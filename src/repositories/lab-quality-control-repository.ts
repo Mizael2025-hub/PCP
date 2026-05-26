@@ -1,17 +1,19 @@
 import { BaseRepository } from "@/repositories/base-repository"
 import type {
-  MixerListFilters,
-  MixerProduction,
-  MixerProductionInsert,
-  MixerProductionUpdate
-} from "@/types/mixer-production"
+  LabQualityControl,
+  LabQualityControlInsert,
+  LabQualityControlListFilters,
+  LabQualityControlUpdate
+} from "@/types/lab-quality-control"
 
-export class MixerProductionRepository extends BaseRepository {
-  async findAll(filters?: MixerListFilters): Promise<MixerProduction[]> {
+export class LabQualityControlRepository extends BaseRepository {
+  async findAll(
+    filters?: LabQualityControlListFilters
+  ): Promise<LabQualityControl[]> {
     const client = await this.getClient()
 
     let query = client
-      .from("mixer_production")
+      .from("lab_quality_control")
       .select("*")
       .order("date", { ascending: false })
       .order("created_at", { ascending: false })
@@ -24,12 +26,8 @@ export class MixerProductionRepository extends BaseRepository {
       query = query.lte("date", filters.dateTo)
     }
 
-    if (filters?.shiftId) {
-      query = query.eq("shift_id", filters.shiftId)
-    }
-
-    if (filters?.batchNumber) {
-      query = query.eq("batch_number", filters.batchNumber)
+    if (filters?.status) {
+      query = query.eq("status", filters.status)
     }
 
     const { data, error } = await query
@@ -41,32 +39,11 @@ export class MixerProductionRepository extends BaseRepository {
     return data ?? []
   }
 
-  async findByIds(ids: string[]): Promise<MixerProduction[]> {
-    const uniqueIds = [...new Set(ids)]
-
-    if (uniqueIds.length === 0) {
-      return []
-    }
-
+  async findById(id: string): Promise<LabQualityControl | null> {
     const client = await this.getClient()
 
     const { data, error } = await client
-      .from("mixer_production")
-      .select("*")
-      .in("id", uniqueIds)
-
-    if (error) {
-      throw error
-    }
-
-    return data ?? []
-  }
-
-  async findById(id: string): Promise<MixerProduction | null> {
-    const client = await this.getClient()
-
-    const { data, error } = await client
-      .from("mixer_production")
+      .from("lab_quality_control")
       .select("*")
       .eq("id", id)
       .maybeSingle()
@@ -78,11 +55,11 @@ export class MixerProductionRepository extends BaseRepository {
     return data
   }
 
-  async create(input: MixerProductionInsert): Promise<MixerProduction> {
+  async create(input: LabQualityControlInsert): Promise<LabQualityControl> {
     const client = await this.getClient()
 
     const { data, error } = await client
-      .from("mixer_production")
+      .from("lab_quality_control")
       .insert(input)
       .select("*")
       .single()
@@ -96,12 +73,12 @@ export class MixerProductionRepository extends BaseRepository {
 
   async update(
     id: string,
-    input: MixerProductionUpdate
-  ): Promise<MixerProduction> {
+    input: LabQualityControlUpdate
+  ): Promise<LabQualityControl> {
     const client = await this.getClient()
 
     const { data, error } = await client
-      .from("mixer_production")
+      .from("lab_quality_control")
       .update(input)
       .eq("id", id)
       .select("*")

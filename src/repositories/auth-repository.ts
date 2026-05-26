@@ -35,4 +35,25 @@ export class AuthRepository extends BaseRepository {
 
     return data
   }
+
+  async findProfilesByIds(ids: string[]): Promise<Profile[]> {
+    const uniqueIds = [...new Set(ids)]
+
+    if (uniqueIds.length === 0) {
+      return []
+    }
+
+    const client = await this.getClient()
+
+    const { data, error } = await client
+      .from("profiles")
+      .select("*")
+      .in("id", uniqueIds)
+
+    if (error) {
+      throw error
+    }
+
+    return data ?? []
+  }
 }

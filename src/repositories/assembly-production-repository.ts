@@ -61,6 +61,23 @@ export class AssemblyProductionRepository extends BaseRepository {
     return data
   }
 
+  async listBatteryLotCodes(): Promise<string[]> {
+    const client = await this.getClient()
+
+    const { data, error } = await client
+      .from("assembly_production")
+      .select("battery_lot_code")
+      .order("battery_lot_code", { ascending: true })
+
+    if (error) {
+      throw error
+    }
+
+    const codes = (data ?? []).map((row) => row.battery_lot_code)
+
+    return [...new Set(codes)]
+  }
+
   async findByBatteryLotCode(
     batteryLotCode: string
   ): Promise<AssemblyProduction | null> {

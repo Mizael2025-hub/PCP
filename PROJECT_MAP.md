@@ -33,6 +33,8 @@
     - `/producao/assembly` — Montagem (lote da bateria, características JSONB)
     - `/producao/sanding-scrap` — Lixação (refugo e placas perdidas)
   - `/qualidade`
+    - `/qualidade/laboratorio` — Controle de qualidade laboratorial
+    - `/qualidade/formacao` — Registro de formação (master-detail)
   - `/estoque`
   - `/configuracoes`
     - `/configuracoes/setores` — CRUD de setores
@@ -405,6 +407,48 @@
 | `src/app/(dashboard)/producao/assembly/loading.tsx`                           | Skeleton de carregamento                                                    |
 | `supabase/migrations/20260526200000_assembly_production_rls.sql`              | RLS + índices em `assembly_production`                                      |
 
+### Qualidade — Laboratório (`src/types`, `src/validations`, `src/repositories`, `src/services`, `src/actions`, `src/components/features/lab-quality-control`)
+
+| Arquivo                                                                       | Responsabilidade                                                                    |
+| ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `src/types/lab-quality-control.ts`                                            | Tipos, status (`PENDING`, `APPROVED`, `REJECTED`) e filtros                         |
+| `src/lib/utils/mass-density.ts`                                               | Cálculo e formatação da densidade a partir do ácido (coluna gerada no banco)        |
+| `src/validations/lab-quality-control/quality-schema.ts`                       | Schemas Zod create/update com campos nullable (`acid_concentration`, `temperature`) |
+| `src/repositories/lab-quality-control-repository.ts`                          | CRUD Supabase (`lab_quality_control`) com filtros por data/status                   |
+| `src/repositories/auth-repository.ts`                                         | `findProfilesByIds` para join de técnicos                                           |
+| `src/repositories/mixer-production-repository.ts`                             | `findByIds` para amostras vinculadas                                                |
+| `src/services/lab-quality-control-service.ts`                                 | Regras de negócio, técnico da sessão, amostras do misturador, attach de relações    |
+| `src/actions/lab-quality-control-actions.ts`                                  | `createLabQualityControlAction`, `updateLabQualityControlAction`                    |
+| `src/components/features/lab-quality-control/lab-quality-control-manager.tsx` | Orquestra tabela histórica, modal e empty state                                     |
+| `src/components/features/lab-quality-control/lab-quality-control-table.tsx`   | TanStack Table, filtros data/status (URL), busca e paginação                        |
+| `src/components/features/lab-quality-control/lab-quality-control-form.tsx`    | Formulário RHF + Zod com densidade calculada em tempo real                          |
+| `src/components/features/lab-quality-control/lab-quality-control-modal.tsx`   | Modal create/edit (iOS Share Sheet)                                                 |
+| `src/app/(dashboard)/qualidade/page.tsx`                                      | Hub de módulos de qualidade                                                         |
+| `src/app/(dashboard)/qualidade/laboratorio/page.tsx`                          | Página server com histórico, master data e filtros via searchParams                 |
+| `src/app/(dashboard)/qualidade/laboratorio/loading.tsx`                       | Skeleton de carregamento                                                            |
+| `supabase/migrations/20260526210000_lab_quality_control_rls.sql`              | RLS + índices em `lab_quality_control`                                              |
+
+### Qualidade — Formação (`src/types`, `src/validations`, `src/repositories`, `src/services`, `src/actions`, `src/components/features/formation-records`)
+
+| Arquivo                                                                  | Responsabilidade                                                              |
+| ------------------------------------------------------------------------ | ----------------------------------------------------------------------------- |
+| `src/types/formation-record.ts`                                          | Tipos master/detail, status (`IN_PROGRESS`, `COMPLETED`) e filtros            |
+| `src/lib/utils/formation-lot-code.ts`                                    | Formatação do lote (`FORM-{YYYYMMDD}-{SEQ}`)                                  |
+| `src/validations/formation-records/formation-schema.ts`                  | Schemas Zod master-detail com linhas dinâmicas e validação de duplicatas      |
+| `src/repositories/formation-record-repository.ts`                        | CRUD Supabase (`formation_records`) com filtros por data/status/operador      |
+| `src/repositories/formation-detail-repository.ts`                        | CRUD de detalhes com `replaceForFormation` (delete + insert)                  |
+| `src/repositories/assembly-production-repository.ts`                     | `listBatteryLotCodes` para selects de lote de bateria                         |
+| `src/services/formation-record-service.ts`                               | Regras de negócio, geração de lote, attach de relações, validação de FKs      |
+| `src/actions/formation-record-actions.ts`                                | `createFormationRecordAction`, `updateFormationRecordAction`                  |
+| `src/components/features/formation-records/formation-record-manager.tsx` | Orquestra tabela histórica expandível, modal e empty state                    |
+| `src/components/features/formation-records/formation-record-table.tsx`   | TanStack Table com master expandível (detail), filtros URL, busca e paginação |
+| `src/components/features/formation-records/formation-details-editor.tsx` | Editor de linhas ilimitadas com `useFieldArray` (circuito, lote, tensões)     |
+| `src/components/features/formation-records/formation-record-form.tsx`    | Formulário master-detail RHF + Zod                                            |
+| `src/components/features/formation-records/formation-record-modal.tsx`   | Modal create/edit (iOS Share Sheet)                                           |
+| `src/app/(dashboard)/qualidade/formacao/page.tsx`                        | Página server com histórico, master data e filtros via searchParams           |
+| `src/app/(dashboard)/qualidade/formacao/loading.tsx`                     | Skeleton de carregamento                                                      |
+| `supabase/migrations/20260526220000_formation_records_rls.sql`           | RLS + índices em `formation_records` e `formation_details`                    |
+
 ---
 
 ## 7. Log de Execução (Roadmap)
@@ -445,6 +489,6 @@
 
 - [x] Empastadeira (`/producao/pasting`) — geração automática de EP Code, rastreabilidade, histórico com filtros data/turno/EP/modelo, Zod, Server Actions, RLS.
 - [x] Lixação (`/producao/sanding-scrap`) — `scrap_weight`, `plates_qty_lost`, gráficos simples, histórico com filtros data/operador, Zod, Server Actions, RLS.
-- [ ] Laboratório (Análises síncronas e assíncronas).
+- [x] Laboratório (`/qualidade/laboratorio`) — `mass_density`, `acid_concentration`, `temperature` (nullable), `status`, histórico com filtros, Zod, Server Actions, RLS.
 - [x] Montagem (`/producao/assembly`) — geração automática de lote da bateria, EP Code de origem, `lot_characteristics` JSONB dinâmico, histórico com filtros, Zod, Server Actions, RLS.
-- [ ] Formação (Cabeçalho e Repetições).
+- [x] Formação (`/qualidade/formacao`) — master-detail, linhas dinâmicas ilimitadas, lote `FORM-*`, histórico expandível, filtros data/status/operador, Zod, Server Actions, RLS.
