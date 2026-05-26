@@ -24,6 +24,11 @@
 - `/(dashboard)` (privada — requer sessão)
   - `/` — Início
   - `/producao`
+    - `/producao/grid-casting` — Fundidora de Grades (apontamentos + paradas)
+    - `/producao/lead-ball` — Boleira (produção de bola de chumbo)
+    - `/producao/oxide-mill` — Moinho de Óxido (peso de óxido e grau de oxidação)
+    - `/producao/mixer` — Misturador (batelada, volumes e densidade)
+    - `/producao/lead-consumption` — Consumo de Chumbo (liga e setor destino)
   - `/qualidade`
   - `/estoque`
   - `/configuracoes`
@@ -57,18 +62,19 @@
 
 ### UI base (`src/components/ui/`)
 
-| Arquivo               | Responsabilidade                                             |
-| --------------------- | ------------------------------------------------------------ |
-| `button.tsx`          | Botão com variantes (primary, secondary, destructive, ghost) |
-| `input.tsx`           | Input com label, hint e estado de erro                       |
-| `select.tsx`          | Select nativo com label, hint e estado de erro               |
-| `card.tsx`            | Container de conteúdo com título/descrição                   |
-| `modal.tsx`           | Modal estilo iOS Share Sheet                                 |
-| `table-container.tsx` | Wrapper para tabelas com scroll                              |
-| `page-header.tsx`     | Cabeçalho de página com título e ações                       |
-| `skeleton.tsx`        | Loading skeletons (Page, Table, Card)                        |
-| `empty-state.tsx`     | Estado vazio com ícone e ação opcional                       |
-| `error-state.tsx`     | Estado de erro com retry                                     |
+| Arquivo                | Responsabilidade                                             |
+| ---------------------- | ------------------------------------------------------------ |
+| `button.tsx`           | Botão com variantes (primary, secondary, destructive, ghost) |
+| `input.tsx`            | Input com label, hint e estado de erro                       |
+| `select.tsx`           | Select nativo com label, hint e estado de erro               |
+| `card.tsx`             | Container de conteúdo com título/descrição                   |
+| `modal.tsx`            | Modal estilo iOS Share Sheet                                 |
+| `table-container.tsx`  | Wrapper para tabelas com scroll                              |
+| `simple-bar-chart.tsx` | Gráfico de barras horizontal simples (CSS/Tailwind)          |
+| `page-header.tsx`      | Cabeçalho de página com título e ações                       |
+| `skeleton.tsx`         | Loading skeletons (Page, Table, Card)                        |
+| `empty-state.tsx`      | Estado vazio com ícone e ação opcional                       |
+| `error-state.tsx`      | Estado de erro com retry                                     |
 
 ### Config (`src/config/`)
 
@@ -236,6 +242,110 @@
 | `src/lib/supabase/server.ts`         | `TypedSupabaseClient` — corrige inferência de tipos do `@supabase/ssr` |
 | `src/lib/supabase/database.types.ts` | `sectors.is_active` + `Relationships` em todas as tabelas              |
 
+### Produção — Fundidora de Grades (`src/types`, `src/validations`, `src/repositories`, `src/services`, `src/actions`, `src/components/features/grid-casting`)
+
+| Arquivo                                                         | Responsabilidade                                                               |
+| --------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `src/types/grid-casting.ts`                                     | Tipos `GridCastingProduction`, `GridCastingProductionWithRelations`, filtros   |
+| `src/validations/grid-casting/production-schema.ts`             | Schemas Zod create/update com validação de pesos e selects dependentes (setor) |
+| `src/repositories/grid-casting-production-repository.ts`        | CRUD Supabase (`grid_casting_production`) com filtros por data/turno           |
+| `src/services/grid-casting-service.ts`                          | Regras de negócio, FKs ativas, `created_by`, attach de relações                |
+| `src/actions/grid-casting-actions.ts`                           | `createGridCastingAction`, `updateGridCastingAction`                           |
+| `src/components/features/grid-casting/grid-casting-manager.tsx` | Orquestra tabela, modal e empty state                                          |
+| `src/components/features/grid-casting/grid-casting-table.tsx`   | TanStack Table, filtros por data/turno (URL), busca e paginação                |
+| `src/components/features/grid-casting/grid-casting-form.tsx`    | Formulário RHF + Zod com selects dependentes (setor → máquina/operador)        |
+| `src/components/features/grid-casting/grid-casting-modal.tsx`   | Modal create/edit (iOS Share Sheet)                                            |
+| `src/app/(dashboard)/producao/page.tsx`                         | Hub de módulos de produção                                                     |
+| `src/app/(dashboard)/producao/grid-casting/page.tsx`            | Página server com listagem, master data e filtros via searchParams             |
+| `src/app/(dashboard)/producao/grid-casting/loading.tsx`         | Skeleton de carregamento                                                       |
+
+### Produção — Paradas da Fundidora (`src/types`, `src/validations`, `src/repositories`, `src/services`, `src/actions`, `src/components/features/grid-casting`)
+
+| Arquivo                                                                  | Responsabilidade                                                            |
+| ------------------------------------------------------------------------ | --------------------------------------------------------------------------- |
+| `src/types/grid-casting-downtime.ts`                                     | Tipos `GridCastingDowntime`, `GridCastingDowntimeWithProduction`, filtros   |
+| `src/validations/grid-casting/downtime-schema.ts`                        | Schemas Zod create/update com cálculo automático de `duration_minutes`      |
+| `src/lib/utils/datetime.ts`                                              | Conversão datetime-local ↔ ISO e formatação de duração                      |
+| `src/repositories/grid-casting-downtime-repository.ts`                   | CRUD Supabase (`grid_casting_downtime`) filtrado por apontamentos           |
+| `src/services/grid-casting-downtime-service.ts`                          | Regras de negócio, FK em `production_id`, attach de relações do apontamento |
+| `src/actions/grid-casting-downtime-actions.ts`                           | `createGridCastingDowntimeAction`, `updateGridCastingDowntimeAction`        |
+| `src/components/features/grid-casting/grid-casting-tabs.tsx`             | Abas Apontamentos / Paradas na mesma rota                                   |
+| `src/components/features/grid-casting/grid-casting-downtime-manager.tsx` | Orquestra tabela histórica, modal e empty state                             |
+| `src/components/features/grid-casting/grid-casting-downtime-table.tsx`   | TanStack Table, filtros data/turno/apontamento (URL), busca e paginação     |
+| `src/components/features/grid-casting/grid-casting-downtime-form.tsx`    | Formulário RHF + Zod com duração calculada em tempo real                    |
+| `src/components/features/grid-casting/grid-casting-downtime-modal.tsx`   | Modal create/edit (iOS Share Sheet)                                         |
+| `supabase/migrations/20260526130000_grid_casting_downtime_rls.sql`       | RLS + índices em `grid_casting_downtime`                                    |
+
+### Produção — Boleira (`src/types`, `src/validations`, `src/repositories`, `src/services`, `src/actions`, `src/components/features/lead-ball-production`)
+
+| Arquivo                                                                         | Responsabilidade                                                       |
+| ------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `src/types/lead-ball-production.ts`                                             | Tipos `LeadBallProduction`, `LeadBallProductionWithRelations`, filtros |
+| `src/validations/lead-ball-production/production-schema.ts`                     | Schemas Zod create/update (`silo_number`, `weight_produced`)           |
+| `src/repositories/lead-ball-production-repository.ts`                           | CRUD Supabase (`lead_ball_production`) com filtros por data/turno/silo |
+| `src/services/lead-ball-production-service.ts`                                  | Regras de negócio, FKs ativas, attach de relações (turno, operador)    |
+| `src/actions/lead-ball-production-actions.ts`                                   | `createLeadBallAction`, `updateLeadBallAction`                         |
+| `src/components/features/lead-ball-production/lead-ball-production-manager.tsx` | Orquestra tabela, modal e empty state                                  |
+| `src/components/features/lead-ball-production/lead-ball-production-table.tsx`   | TanStack Table, filtros data/turno/silo (URL), busca e paginação       |
+| `src/components/features/lead-ball-production/lead-ball-production-form.tsx`    | Formulário RHF + Zod (data, turno, operador, silo, peso)               |
+| `src/components/features/lead-ball-production/lead-ball-production-modal.tsx`   | Modal create/edit (iOS Share Sheet)                                    |
+| `src/app/(dashboard)/producao/lead-ball/page.tsx`                               | Página server com listagem, master data e filtros via searchParams     |
+| `src/app/(dashboard)/producao/lead-ball/loading.tsx`                            | Skeleton de carregamento                                               |
+| `supabase/migrations/20260526140000_lead_ball_production_rls.sql`               | RLS + índices em `lead_ball_production`                                |
+
+### Produção — Moinho de Óxido (`src/types`, `src/validations`, `src/repositories`, `src/services`, `src/actions`, `src/components/features/oxide-mill-production`)
+
+| Arquivo                                                                           | Responsabilidade                                                               |
+| --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `src/types/oxide-mill-production.ts`                                              | Tipos `OxideMillProduction`, `OxideMillProductionWithRelations`, filtros       |
+| `src/validations/oxide-mill-production/production-schema.ts`                      | Schemas Zod create/update (`oxide_weight`, `oxidation_degree`)                 |
+| `src/repositories/oxide-mill-production-repository.ts`                            | CRUD Supabase (`oxide_mill_production`) com filtros por data/turno             |
+| `src/services/oxide-mill-production-service.ts`                                   | Regras de negócio, FKs ativas, attach de relações, resumo diário para gráficos |
+| `src/actions/oxide-mill-production-actions.ts`                                    | `createOxideMillAction`, `updateOxideMillAction`                               |
+| `src/components/features/oxide-mill-production/oxide-mill-production-manager.tsx` | Orquestra gráficos, tabela, modal e empty state                                |
+| `src/components/features/oxide-mill-production/oxide-mill-production-charts.tsx`  | Gráficos simples de peso e grau de oxidação por dia                            |
+| `src/components/features/oxide-mill-production/oxide-mill-production-table.tsx`   | TanStack Table, filtros data/turno (URL), busca e paginação                    |
+| `src/components/features/oxide-mill-production/oxide-mill-production-form.tsx`    | Formulário RHF + Zod (data, turno, operador, peso, grau)                       |
+| `src/components/features/oxide-mill-production/oxide-mill-production-modal.tsx`   | Modal create/edit (iOS Share Sheet)                                            |
+| `src/app/(dashboard)/producao/oxide-mill/page.tsx`                                | Página server com listagem, gráficos, master data e filtros via searchParams   |
+| `src/app/(dashboard)/producao/oxide-mill/loading.tsx`                             | Skeleton de carregamento                                                       |
+| `supabase/migrations/20260526150000_oxide_mill_production_rls.sql`                | RLS + índices em `oxide_mill_production`                                       |
+
+### Produção — Misturador (`src/types`, `src/validations`, `src/repositories`, `src/services`, `src/actions`, `src/components/features/mixer-production`)
+
+| Arquivo                                                                 | Responsabilidade                                                       |
+| ----------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `src/types/mixer-production.ts`                                         | Tipos `MixerProduction`, `MixerProductionWithRelations`, filtros       |
+| `src/validations/mixer-production/production-schema.ts`                 | Schemas Zod create/update (`batch_number`, volumes, densidade, pesos)  |
+| `src/repositories/mixer-production-repository.ts`                       | CRUD Supabase (`mixer_production`) com filtros por data/turno/batelada |
+| `src/services/mixer-production-service.ts`                              | Regras de negócio, FKs ativas, attach de relações (turno, operador)    |
+| `src/actions/mixer-production-actions.ts`                               | `createMixerAction`, `updateMixerAction`                               |
+| `src/components/features/mixer-production/mixer-production-manager.tsx` | Orquestra tabela, modal e empty state                                  |
+| `src/components/features/mixer-production/mixer-production-table.tsx`   | TanStack Table, filtros data/turno/batelada (URL), busca e paginação   |
+| `src/components/features/mixer-production/mixer-production-form.tsx`    | Formulário RHF + Zod (data, turno, operador, batelada, pesos, volumes) |
+| `src/components/features/mixer-production/mixer-production-modal.tsx`   | Modal create/edit (iOS Share Sheet)                                    |
+| `src/app/(dashboard)/producao/mixer/page.tsx`                           | Página server com listagem, master data e filtros via searchParams     |
+| `src/app/(dashboard)/producao/mixer/loading.tsx`                        | Skeleton de carregamento                                               |
+| `supabase/migrations/20260526160000_mixer_production_rls.sql`           | RLS + índices em `mixer_production`                                    |
+
+### Produção — Consumo de Chumbo (`src/types`, `src/validations`, `src/repositories`, `src/services`, `src/actions`, `src/components/features/lead-consumption`)
+
+| Arquivo                                                                 | Responsabilidade                                                             |
+| ----------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `src/types/lead-consumption.ts`                                         | Tipos `LeadConsumption`, `LeadConsumptionWithRelations`, filtros e resumos   |
+| `src/validations/lead-consumption/consumption-schema.ts`                | Schemas Zod create/update (`alloy_id`, `destination_sector_id`, peso)        |
+| `src/repositories/lead-consumption-repository.ts`                       | CRUD Supabase (`lead_consumption`) com filtros por data/liga/setor           |
+| `src/services/lead-consumption-service.ts`                              | Regras de negócio, FKs ativas, attach de relações, resumos para gráficos     |
+| `src/actions/lead-consumption-actions.ts`                               | `createLeadConsumptionAction`, `updateLeadConsumptionAction`                 |
+| `src/components/features/lead-consumption/lead-consumption-manager.tsx` | Orquestra gráficos, tabela, modal e empty state                              |
+| `src/components/features/lead-consumption/lead-consumption-charts.tsx`  | Gráficos simples por dia, liga e setor de destino                            |
+| `src/components/features/lead-consumption/lead-consumption-table.tsx`   | TanStack Table, filtros data/liga/setor (URL), busca e paginação             |
+| `src/components/features/lead-consumption/lead-consumption-form.tsx`    | Formulário RHF + Zod (data, liga, setor, peso)                               |
+| `src/components/features/lead-consumption/lead-consumption-modal.tsx`   | Modal create/edit (iOS Share Sheet)                                          |
+| `src/app/(dashboard)/producao/lead-consumption/page.tsx`                | Página server com listagem, gráficos, master data e filtros via searchParams |
+| `src/app/(dashboard)/producao/lead-consumption/loading.tsx`             | Skeleton de carregamento                                                     |
+| `supabase/migrations/20260526170000_lead_consumption_rls.sql`           | RLS + índices em `lead_consumption`                                          |
+
 ---
 
 ## 7. Log de Execução (Roadmap)
@@ -265,10 +375,12 @@
 
 ### Fase 3: Produção (Peso)
 
-- [ ] Fundidora de Grade (Produção e Paradas).
-- [ ] Boleira.
-- [ ] Moinho e Misturador.
-- [ ] Consumo de Chumbo.
+- [x] Fundidora de Grade (`/producao/grid-casting`) — formulário completo, selects dependentes, Zod, Server Actions, tabela histórica, filtros data/turno, loading/empty states, toast.
+- [x] Paradas da Fundidora (`/producao/grid-casting?tab=paradas`) — vínculo com apontamento, modal deslizante, duração automática, histórico com filtros, Zod, Server Actions, RLS.
+- [x] Boleira (`/producao/lead-ball`) — `silo_number`, `weight_produced`, tabela histórica, filtros data/turno/silo, Zod, Server Actions, RLS.
+- [x] Moinho de Óxido (`/producao/oxide-mill`) — `oxide_weight`, `oxidation_degree`, gráficos simples, tabela histórica, filtros data/turno, Zod, Server Actions, RLS.
+- [x] Misturador (`/producao/mixer`) — `batch_number`, volumes, densidade, tabela histórica, filtros data/turno/batelada, Zod, Server Actions, RLS.
+- [x] Consumo de Chumbo (`/producao/lead-consumption`) — `alloy_id`, `destination_sector_id`, gráficos simples, tabela histórica, filtros data/liga/setor, Zod, Server Actions, RLS.
 
 ### Fase 4: Rastreabilidade e Qualidade
 
