@@ -1,4 +1,5 @@
 import {
+  BarChart3,
   Factory,
   FlaskConical,
   Home,
@@ -33,6 +34,11 @@ export const NAV_ITEMS: NavItem[] = [
     label: "Estoque",
     href: "/estoque",
     icon: Package
+  },
+  {
+    label: "Relatórios",
+    href: "/relatorios",
+    icon: BarChart3
   },
   {
     label: "Configurações",

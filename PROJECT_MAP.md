@@ -36,6 +36,9 @@
     - `/qualidade/laboratorio` — Controle de qualidade laboratorial
     - `/qualidade/formacao` — Registro de formação (master-detail)
   - `/estoque`
+  - `/relatorios` — Dashboard consolidado (KPIs, gráficos, tabelas resumo)
+  - `/relatorios/balanco-massa` — Balanço de massa (cruzamento lead/mixer/fundidora/lixação)
+  - `/relatorios/perdas` — Dashboard de perdas (lixação × empastadeira)
   - `/configuracoes`
     - `/configuracoes/setores` — CRUD de setores
     - `/configuracoes/turnos` — CRUD de turnos
@@ -449,6 +452,57 @@
 | `src/app/(dashboard)/qualidade/formacao/loading.tsx`                     | Skeleton de carregamento                                                      |
 | `supabase/migrations/20260526220000_formation_records_rls.sql`           | RLS + índices em `formation_records` e `formation_details`                    |
 
+### Relatórios (`src/types`, `src/validations`, `src/repositories`, `src/services`, `src/components/features/reports`)
+
+| Arquivo                                                    | Responsabilidade                                                       |
+| ---------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `src/types/report.ts`                                      | Tipos de filtros, KPIs, gráficos e dashboard consolidado               |
+| `src/validations/reports/report-filter-schema.ts`          | Schema Zod dos filtros globais (data, turno, setor)                    |
+| `src/lib/utils/report-format.ts`                           | Formatação de peso, inteiros e percentuais para UI                     |
+| `src/repositories/report-repository.ts`                    | Queries agregadas em todas as tabelas de produção/qualidade            |
+| `src/services/report-service.ts`                           | Consolidação de KPIs, gráficos, filtro por setor e resumos por módulo  |
+| `src/components/features/reports/report-filters.tsx`       | Filtros globais via URL (client) com loading state                     |
+| `src/components/features/reports/report-kpi-cards.tsx`     | Cards de KPIs (server)                                                 |
+| `src/components/features/reports/report-charts.tsx`        | Gráficos `SimpleBarChart` por dia, módulo, qualidade e refugo (server) |
+| `src/components/features/reports/report-summary-table.tsx` | Tabela resumo por módulo (server)                                      |
+| `src/components/features/reports/reports-dashboard.tsx`    | Orquestra KPIs, gráficos e tabela (server)                             |
+| `src/app/(dashboard)/relatorios/page.tsx`                  | Página server com filtros via searchParams                             |
+| `src/app/(dashboard)/relatorios/loading.tsx`               | Skeleton dedicado (`ReportsPageSkeleton`)                              |
+| `src/components/ui/skeleton.tsx`                           | `ReportsPageSkeleton` para filtros, KPIs, gráficos e tabela            |
+
+### Balanço de massa (`src/types`, `src/repositories`, `src/services`, `src/components/features/mass-balance`)
+
+| Arquivo                                                            | Responsabilidade                                                   |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------ |
+| `src/types/mass-balance.ts`                                        | Tipos de indicadores, fluxo, tendência diária e dashboard          |
+| `src/repositories/mass-balance-repository.ts`                      | 4 queries paralelas otimizadas (somente colunas de massa/data/FK)  |
+| `src/services/mass-balance-service.ts`                             | Cálculo automático de saldo, desvio, rendimento e agregação diária |
+| `src/components/features/mass-balance/mass-balance-kpi-cards.tsx`  | KPIs e contagem cruzada de registros (server)                      |
+| `src/components/features/mass-balance/mass-balance-charts.tsx`     | Gráficos de cruzamento, distribuição e tendência diária (server)   |
+| `src/components/features/mass-balance/mass-balance-flow-table.tsx` | Tabela de fluxo entrada → processos → saldo (server)               |
+| `src/components/features/mass-balance/mass-balance-dashboard.tsx`  | Orquestra KPIs, gráficos e fluxo (server)                          |
+| `src/components/features/reports/reports-nav.tsx`                  | Navegação entre relatório consolidado e balanço de massa           |
+| `src/app/(dashboard)/relatorios/balanco-massa/page.tsx`            | Página server com filtros globais e dashboard de balanço           |
+| `src/app/(dashboard)/relatorios/balanco-massa/loading.tsx`         | Skeleton de carregamento                                           |
+
+### Dashboard de perdas (`src/types`, `src/validations`, `src/repositories`, `src/services`, `src/lib/export`, `src/components/features/losses-dashboard`)
+
+| Arquivo                                                              | Responsabilidade                                                             |
+| -------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `src/types/losses-dashboard.ts`                                      | Tipos de indicadores, tendência diária, resumos e dashboard                  |
+| `src/validations/reports/period-filter-schema.ts`                    | Schema Zod de filtros por período (data inicial/final)                       |
+| `src/repositories/losses-dashboard-repository.ts`                    | 2 queries paralelas otimizadas (`sanding_scrap`, `pasting_production`)       |
+| `src/services/losses-dashboard-service.ts`                           | Cálculos de taxa de perda, rendimento e agregações por modelo/operador       |
+| `src/lib/export/losses-export.ts`                                    | Payload tipado + stub `exportLossesToExcel` preparado para exportação futura |
+| `src/components/features/losses-dashboard/losses-period-filters.tsx` | Filtros por período via URL (client)                                         |
+| `src/components/features/losses-dashboard/losses-export-action.tsx`  | Botão Exportar Excel (client) com payload serializado                        |
+| `src/components/features/losses-dashboard/losses-kpi-cards.tsx`      | KPIs de refugo, placas e taxas (server)                                      |
+| `src/components/features/losses-dashboard/losses-charts.tsx`         | Gráficos comparativos e tendências diárias (server)                          |
+| `src/components/features/losses-dashboard/losses-summary-table.tsx`  | Tabelas resumo por módulo, modelo e operador (server)                        |
+| `src/components/features/losses-dashboard/losses-dashboard-view.tsx` | Orquestra KPIs, gráficos e tabelas (server)                                  |
+| `src/app/(dashboard)/relatorios/perdas/page.tsx`                     | Página server com filtros, export preparado e dashboard                      |
+| `src/app/(dashboard)/relatorios/perdas/loading.tsx`                  | Skeleton de carregamento                                                     |
+
 ---
 
 ## 7. Log de Execução (Roadmap)
@@ -492,3 +546,10 @@
 - [x] Laboratório (`/qualidade/laboratorio`) — `mass_density`, `acid_concentration`, `temperature` (nullable), `status`, histórico com filtros, Zod, Server Actions, RLS.
 - [x] Montagem (`/producao/assembly`) — geração automática de lote da bateria, EP Code de origem, `lot_characteristics` JSONB dinâmico, histórico com filtros, Zod, Server Actions, RLS.
 - [x] Formação (`/qualidade/formacao`) — master-detail, linhas dinâmicas ilimitadas, lote `FORM-*`, histórico expandível, filtros data/status/operador, Zod, Server Actions, RLS.
+
+### Fase 5: Relatórios e Estoque
+
+- [x] Relatórios (`/relatorios`) — dashboard consolidado, filtros globais data/turno/setor, KPIs, gráficos SimpleBarChart, tabela resumo por módulo, loading/skeleton, Server Components.
+- [x] Balanço de massa (`/relatorios/balanco-massa`) — cruzamento lead_consumption + mixer + grid_casting + sanding_scrap, cálculos automáticos de saldo/desvio/rendimento, gráficos, indicadores, queries otimizadas.
+- [x] Dashboard de perdas (`/relatorios/perdas`) — cruzamento lixação + empastadeira, filtros por período, KPIs, gráficos, tabelas resumo, payload Excel preparado.
+- [ ] Estoque (`/estoque`) — controle de materiais e insumos.
