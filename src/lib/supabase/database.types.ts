@@ -28,6 +28,7 @@ export interface Database {
           description?: string | null
           created_at?: string
         }
+        Relationships: []
       }
       permissions: {
         Row: {
@@ -48,11 +49,13 @@ export interface Database {
           description?: string | null
           created_at?: string
         }
+        Relationships: []
       }
       role_permissions: {
         Row: { role_id: string; permission_id: string }
         Insert: { role_id: string; permission_id: string }
         Update: { role_id?: string; permission_id?: string }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -82,11 +85,28 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
       }
       sectors: {
-        Row: { id: string; name: string; created_at: string }
-        Insert: { id?: string; name: string; created_at?: string }
-        Update: { id?: string; name?: string; created_at?: string }
+        Row: {
+          id: string
+          name: string
+          is_active: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          is_active?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          is_active?: boolean
+          created_at?: string
+        }
+        Relationships: []
       }
       shifts: {
         Row: {
@@ -110,6 +130,7 @@ export interface Database {
           end_time?: string
           created_at?: string
         }
+        Relationships: []
       }
       employees: {
         Row: {
@@ -136,6 +157,7 @@ export interface Database {
           is_active?: boolean
           created_at?: string
         }
+        Relationships: []
       }
       machines: {
         Row: {
@@ -159,6 +181,7 @@ export interface Database {
           is_active?: boolean
           created_at?: string
         }
+        Relationships: []
       }
       battery_models: {
         Row: {
@@ -182,6 +205,7 @@ export interface Database {
           weight_specification?: number
           created_at?: string
         }
+        Relationships: []
       }
       lead_alloys: {
         Row: {
@@ -202,6 +226,7 @@ export interface Database {
           description?: string | null
           created_at?: string
         }
+        Relationships: []
       }
       grid_casting_production: {
         Row: {
@@ -246,6 +271,7 @@ export interface Database {
           created_at?: string
           created_by?: string | null
         }
+        Relationships: []
       }
       grid_casting_downtime: {
         Row: {
@@ -272,6 +298,7 @@ export interface Database {
           start_time?: string
           end_time?: string
         }
+        Relationships: []
       }
       lead_ball_production: {
         Row: {
@@ -301,6 +328,7 @@ export interface Database {
           silo_number?: number
           created_at?: string
         }
+        Relationships: []
       }
       oxide_mill_production: {
         Row: {
@@ -330,6 +358,7 @@ export interface Database {
           oxidation_degree?: number
           created_at?: string
         }
+        Relationships: []
       }
       mixer_production: {
         Row: {
@@ -371,6 +400,7 @@ export interface Database {
           density?: number
           created_at?: string
         }
+        Relationships: []
       }
       lead_consumption: {
         Row: {
@@ -397,6 +427,7 @@ export interface Database {
           destination_sector_id?: string
           created_at?: string
         }
+        Relationships: []
       }
       pasting_production: {
         Row: {
@@ -432,6 +463,7 @@ export interface Database {
           plates_qty?: number
           created_at?: string
         }
+        Relationships: []
       }
       sanding_scrap: {
         Row: {
@@ -458,6 +490,7 @@ export interface Database {
           plates_qty_lost?: number
           created_at?: string
         }
+        Relationships: []
       }
       assembly_production: {
         Row: {
@@ -496,6 +529,7 @@ export interface Database {
           lot_characteristics?: Json
           created_at?: string
         }
+        Relationships: []
       }
       lab_quality_control: {
         Row: {
@@ -537,6 +571,7 @@ export interface Database {
           notes?: string | null
           created_at?: string
         }
+        Relationships: []
       }
       formation_records: {
         Row: {
@@ -566,6 +601,7 @@ export interface Database {
           status?: string
           created_at?: string
         }
+        Relationships: []
       }
       formation_details: {
         Row: {
@@ -598,11 +634,14 @@ export interface Database {
           current_ampere?: number
           created_at?: string
         }
+        Relationships: []
       }
     }
-    Views: Record<string, never>
-    Functions: Record<string, never>
-    Enums: Record<string, never>
-    CompositeTypes: Record<string, never>
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      [_ in never]: never
+    }
   }
 }

@@ -3,6 +3,8 @@
 import { ThemeProvider } from "next-themes"
 import { Toaster } from "sonner"
 
+import { AuthProvider } from "@/components/providers/auth-provider"
+
 type AppProvidersProps = {
   children: React.ReactNode
 }
@@ -15,7 +17,7 @@ export function AppProviders({ children }: AppProvidersProps) {
       enableSystem
       disableTransitionOnChange
     >
-      {children}
+      <AuthProvider>{children}</AuthProvider>
       <Toaster
         position="top-center"
         richColors

@@ -1,59 +1,28 @@
-import { createServerClient } from "@supabase/ssr"
 import { NextResponse, type NextRequest } from "next/server"
 
-type CookieOptions = {
-  name?: string
-  value?: string
-  path?: string
-  domain?: string
-  maxAge?: number
-  expires?: Date
-  httpOnly?: boolean
-  secure?: boolean
-  sameSite?: "lax" | "strict" | "none"
-}
+import { updateSession } from "@/lib/supabase/middleware"
+
+const AUTH_PATHS = ["/login"]
+
+const PUBLIC_PATHS = ["/login"]
 
 export async function middleware(request: NextRequest) {
-  const response = NextResponse.next({
-    request
-  })
+  const { response, user } = await updateSession(request)
+  const { pathname } = request.nextUrl
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return request.cookies.get(name)?.value
-        },
-
-        set(name: string, value: string, options: CookieOptions) {
-          response.cookies.set({
-            name,
-            value,
-            ...options
-          })
-        },
-
-        remove(name: string, options: CookieOptions) {
-          response.cookies.set({
-            name,
-            value: "",
-            ...options
-          })
-        }
-      }
-    }
+  const isAuthPage = AUTH_PATHS.some((path) => pathname.startsWith(path))
+  const isPublic = PUBLIC_PATHS.some(
+    (path) => pathname === path || pathname.startsWith(path)
   )
 
-  const {
-    data: { user }
-  } = await supabase.auth.getUser()
+  if (user && isAuthPage) {
+    return NextResponse.redirect(new URL("/", request.url))
+  }
 
-  const isAuthPage = request.nextUrl.pathname.startsWith("/login")
-
-  if (!user && !isAuthPage) {
-    return NextResponse.redirect(new URL("/login", request.url))
+  if (!user && !isPublic) {
+    const loginUrl = new URL("/login", request.url)
+    loginUrl.searchParams.set("next", pathname)
+    return NextResponse.redirect(loginUrl)
   }
 
   return response

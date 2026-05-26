@@ -55,6 +55,7 @@ create table public.profiles (
 create table public.sectors (
     id uuid default uuid_generate_v4() primary key,
     name varchar(100) not null unique,
+    is_active boolean default true not null,
     created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
