@@ -1,5 +1,14 @@
 import Link from "next/link"
-import { Blend, CircleDot, FlaskConical, Grid3X3, Package } from "lucide-react"
+import {
+  Battery,
+  Blend,
+  CircleDot,
+  FlaskConical,
+  Grid3X3,
+  Layers,
+  Package,
+  Trash2
+} from "lucide-react"
 
 import { PageHeader } from "@/components/ui/page-header"
 
@@ -64,6 +73,47 @@ export default function ProducaoPage() {
           <h3 className="font-semibold">Misturador</h3>
           <p className="mt-1 text-sm text-zinc-500">
             Batelada, volumes, densidade e histórico por turno.
+          </p>
+        </Link>
+
+        <Link
+          href="/producao/pasting"
+          className="apple-pressable block rounded-ios-card border border-zinc-200 bg-white p-4 shadow-sm transition-all duration-300 hover:border-blue-500/30 dark:border-zinc-800 dark:bg-zinc-900"
+        >
+          <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-ios-btn bg-sky-500/10">
+            <Layers className="h-5 w-5 text-sky-500" strokeWidth={1.5} />
+          </div>
+          <h3 className="font-semibold">Empastadeira</h3>
+          <p className="mt-1 text-sm text-zinc-500">
+            Geração de EP Code, rastreabilidade e histórico por turno e modelo.
+          </p>
+        </Link>
+
+        <Link
+          href="/producao/assembly"
+          className="apple-pressable block rounded-ios-card border border-zinc-200 bg-white p-4 shadow-sm transition-all duration-300 hover:border-blue-500/30 dark:border-zinc-800 dark:bg-zinc-900"
+        >
+          <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-ios-btn bg-indigo-500/10">
+            <Battery className="h-5 w-5 text-indigo-500" strokeWidth={1.5} />
+          </div>
+          <h3 className="font-semibold">Montagem</h3>
+          <p className="mt-1 text-sm text-zinc-500">
+            Lote da bateria, EP Code de origem, características do lote e
+            histórico.
+          </p>
+        </Link>
+
+        <Link
+          href="/producao/sanding-scrap"
+          className="apple-pressable block rounded-ios-card border border-zinc-200 bg-white p-4 shadow-sm transition-all duration-300 hover:border-blue-500/30 dark:border-zinc-800 dark:bg-zinc-900"
+        >
+          <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-ios-btn bg-orange-500/10">
+            <Trash2 className="h-5 w-5 text-orange-500" strokeWidth={1.5} />
+          </div>
+          <h3 className="font-semibold">Lixação</h3>
+          <p className="mt-1 text-sm text-zinc-500">
+            Refugo com peso e placas perdidas, gráficos e histórico por
+            operador.
           </p>
         </Link>
 

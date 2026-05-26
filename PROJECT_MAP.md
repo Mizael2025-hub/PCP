@@ -29,6 +29,9 @@
     - `/producao/oxide-mill` — Moinho de Óxido (peso de óxido e grau de oxidação)
     - `/producao/mixer` — Misturador (batelada, volumes e densidade)
     - `/producao/lead-consumption` — Consumo de Chumbo (liga e setor destino)
+    - `/producao/pasting` — Empastadeira (EP Code, rastreabilidade)
+    - `/producao/assembly` — Montagem (lote da bateria, características JSONB)
+    - `/producao/sanding-scrap` — Lixação (refugo e placas perdidas)
   - `/qualidade`
   - `/estoque`
   - `/configuracoes`
@@ -346,6 +349,62 @@
 | `src/app/(dashboard)/producao/lead-consumption/loading.tsx`             | Skeleton de carregamento                                                     |
 | `supabase/migrations/20260526170000_lead_consumption_rls.sql`           | RLS + índices em `lead_consumption`                                          |
 
+### Rastreabilidade — Empastadeira (`src/types`, `src/validations`, `src/repositories`, `src/services`, `src/actions`, `src/components/features/pasting-production`)
+
+| Arquivo                                                                     | Responsabilidade                                                                 |
+| --------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `src/types/pasting-production.ts`                                           | Tipos `PastingProduction`, `PastingProductionWithRelations`, filtros             |
+| `src/lib/utils/ep-code.ts`                                                  | Formatação do EP Code (`EP-{MODELO}-{YYYYMMDD}-{SEQ}`)                           |
+| `src/validations/pasting-production/production-schema.ts`                   | Schemas Zod create/update com selects dependentes (setor)                        |
+| `src/repositories/pasting-production-repository.ts`                         | CRUD Supabase (`pasting_production`) com filtros por data/turno/EP/modelo        |
+| `src/services/pasting-production-service.ts`                                | Regras de negócio, FKs ativas, geração automática de EP Code, attach de relações |
+| `src/actions/pasting-production-actions.ts`                                 | `createPastingAction`, `updatePastingAction`                                     |
+| `src/components/features/pasting-production/pasting-production-manager.tsx` | Orquestra tabela, modal e empty state                                            |
+| `src/components/features/pasting-production/pasting-production-table.tsx`   | TanStack Table, filtros data/turno/EP/modelo (URL), busca e paginação            |
+| `src/components/features/pasting-production/pasting-production-form.tsx`    | Formulário RHF + Zod com selects dependentes (setor → máquina/operador)          |
+| `src/components/features/pasting-production/pasting-production-modal.tsx`   | Modal create/edit (iOS Share Sheet)                                              |
+| `src/app/(dashboard)/producao/pasting/page.tsx`                             | Página server com listagem, master data e filtros via searchParams               |
+| `src/app/(dashboard)/producao/pasting/loading.tsx`                          | Skeleton de carregamento                                                         |
+| `supabase/migrations/20260526180000_pasting_production_rls.sql`             | RLS + índices em `pasting_production`                                            |
+
+### Rastreabilidade — Lixação (`src/types`, `src/validations`, `src/repositories`, `src/services`, `src/actions`, `src/components/features/sanding-scrap`)
+
+| Arquivo                                                           | Responsabilidade                                                             |
+| ----------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `src/types/sanding-scrap.ts`                                      | Tipos `SandingScrap`, `SandingScrapWithRelations`, filtros e resumos         |
+| `src/validations/sanding-scrap/scrap-schema.ts`                   | Schemas Zod create/update (`scrap_weight`, `plates_qty_lost`)                |
+| `src/repositories/sanding-scrap-repository.ts`                    | CRUD Supabase (`sanding_scrap`) com filtros por data/operador                |
+| `src/services/sanding-scrap-service.ts`                           | Regras de negócio, FKs ativas, resumos para gráficos, attach de relações     |
+| `src/actions/sanding-scrap-actions.ts`                            | `createSandingScrapAction`, `updateSandingScrapAction`                       |
+| `src/components/features/sanding-scrap/sanding-scrap-manager.tsx` | Orquestra gráficos, tabela, modal e empty state                              |
+| `src/components/features/sanding-scrap/sanding-scrap-charts.tsx`  | Gráficos de refugo diário, placas perdidas e por operador                    |
+| `src/components/features/sanding-scrap/sanding-scrap-table.tsx`   | TanStack Table, filtros data/operador (URL), busca e paginação               |
+| `src/components/features/sanding-scrap/sanding-scrap-form.tsx`    | Formulário RHF + Zod (data, operador, peso, placas)                          |
+| `src/components/features/sanding-scrap/sanding-scrap-modal.tsx`   | Modal create/edit (iOS Share Sheet)                                          |
+| `src/app/(dashboard)/producao/sanding-scrap/page.tsx`             | Página server com listagem, gráficos, master data e filtros via searchParams |
+| `src/app/(dashboard)/producao/sanding-scrap/loading.tsx`          | Skeleton de carregamento                                                     |
+| `supabase/migrations/20260526190000_sanding_scrap_rls.sql`        | RLS + índices em `sanding_scrap`                                             |
+
+### Rastreabilidade — Montagem (`src/types`, `src/validations`, `src/repositories`, `src/services`, `src/actions`, `src/components/features/assembly-production`)
+
+| Arquivo                                                                       | Responsabilidade                                                            |
+| ----------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `src/types/assembly-production.ts`                                            | Tipos `AssemblyProduction`, `AssemblyProductionWithRelations`, filtros      |
+| `src/lib/utils/battery-lot-code.ts`                                           | Formatação do lote (`BAT-{MODELO}-{YYYYMMDD}-{SEQ}`)                        |
+| `src/lib/utils/lot-characteristics.ts`                                        | Conversão JSONB ↔ pares chave/valor dinâmicos                               |
+| `src/validations/assembly-production/production-schema.ts`                    | Schemas Zod create/update com selects dependentes e características         |
+| `src/repositories/assembly-production-repository.ts`                          | CRUD Supabase (`assembly_production`) com filtros por data/turno/lote/EP    |
+| `src/services/assembly-production-service.ts`                                 | Regras de negócio, FKs, geração de lote, EP disponíveis, attach de relações |
+| `src/actions/assembly-production-actions.ts`                                  | `createAssemblyAction`, `updateAssemblyAction`                              |
+| `src/components/features/assembly-production/assembly-production-manager.tsx` | Orquestra tabela, modal e empty state                                       |
+| `src/components/features/assembly-production/assembly-production-table.tsx`   | TanStack Table, filtros data/turno/lote/EP (URL), busca e paginação         |
+| `src/components/features/assembly-production/assembly-production-form.tsx`    | Formulário RHF + Zod com selects dependentes (setor) e EP Code              |
+| `src/components/features/assembly-production/lot-characteristics-editor.tsx`  | Editor dinâmico de `lot_characteristics` (JSONB)                            |
+| `src/components/features/assembly-production/assembly-production-modal.tsx`   | Modal create/edit (iOS Share Sheet)                                         |
+| `src/app/(dashboard)/producao/assembly/page.tsx`                              | Página server com listagem, master data e filtros via searchParams          |
+| `src/app/(dashboard)/producao/assembly/loading.tsx`                           | Skeleton de carregamento                                                    |
+| `supabase/migrations/20260526200000_assembly_production_rls.sql`              | RLS + índices em `assembly_production`                                      |
+
 ---
 
 ## 7. Log de Execução (Roadmap)
@@ -384,8 +443,8 @@
 
 ### Fase 4: Rastreabilidade e Qualidade
 
-- [ ] Empastadeira (Geração EP).
-- [ ] Lixação (Percas).
+- [x] Empastadeira (`/producao/pasting`) — geração automática de EP Code, rastreabilidade, histórico com filtros data/turno/EP/modelo, Zod, Server Actions, RLS.
+- [x] Lixação (`/producao/sanding-scrap`) — `scrap_weight`, `plates_qty_lost`, gráficos simples, histórico com filtros data/operador, Zod, Server Actions, RLS.
 - [ ] Laboratório (Análises síncronas e assíncronas).
-- [ ] Montagem (Geração de Lote e Características).
+- [x] Montagem (`/producao/assembly`) — geração automática de lote da bateria, EP Code de origem, `lot_characteristics` JSONB dinâmico, histórico com filtros, Zod, Server Actions, RLS.
 - [ ] Formação (Cabeçalho e Repetições).
