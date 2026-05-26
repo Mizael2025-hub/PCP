@@ -1,0 +1,144 @@
+# REGRAS GLOBAIS DO PROJETO
+
+## STACK OBRIGATÓRIA
+
+- Next.js App Router
+- TypeScript STRICT
+- Tailwind CSS
+- Supabase
+- Zustand
+- Zod
+- React Hook Form
+- TanStack Table
+- Sonner
+- date-fns
+
+---
+
+# ARQUITETURA
+
+## Estrutura obrigatória
+
+src/
+  actions/
+  services/
+  repositories/
+  validations/
+  hooks/
+  stores/
+  components/
+    ui/
+    layout/
+    features/
+
+---
+
+# REGRAS DE DADOS
+
+- Nunca acessar Supabase diretamente em componentes visuais.
+- Toda leitura deve passar por repositories/services.
+- Toda escrita deve usar Server Actions.
+- Toda entrada deve validar com Zod.
+- Nunca duplicar regra de negócio.
+- Nunca colocar lógica pesada em components.
+
+---
+
+# COMPONENTIZAÇÃO
+
+## components/ui
+Somente componentes visuais reutilizáveis.
+
+## components/features
+Componentes com regra de negócio.
+
+## components/layout
+Navbar, sidebar, tabs, containers.
+
+---
+
+# PROIBIDO
+
+- Refatorar arquivos não relacionados.
+- Alterar arquitetura existente.
+- Trocar bibliotecas sem autorização.
+- Criar abstrações desnecessárias.
+- Criar hooks sem necessidade.
+- Criar componentes gigantes.
+- Usar any.
+- Usar catch vazio.
+- Ignorar erros TypeScript.
+- Desabilitar ESLint.
+
+---
+
+# OBRIGATÓRIO
+
+- Mudanças mínimas e seguras.
+- TypeScript estrito.
+- Validar:
+  - npm run lint
+  - npm run build
+  - npm run type-check
+- Atualizar PROJECT_MAP.md ao finalizar.
+- Explicar impacto das alterações.
+
+---
+
+# PADRÃO DE ERRO
+
+Nunca:
+
+catch {}
+
+Sempre:
+
+catch (error) {
+  console.error("[functionName]", error)
+
+  return {
+    success: false,
+    message: "Erro interno."
+  }
+}
+
+---
+
+# PADRÃO DE FORMULÁRIOS
+
+- React Hook Form
+- Zod Resolver
+
+---
+
+# PADRÃO DE DATAS
+
+- Banco UTC
+- Front timezone local
+- date-fns obrigatório
+
+---
+
+# OFFLINE
+
+- IndexedDB obrigatório
+- Outbox pattern
+- Retry automático
+- Sync status visível
+- Resolver conflitos por updated_at
+
+---
+
+# TESTES
+
+- Vitest para unitários
+- Playwright para E2E
+
+---
+
+# UI
+
+Seguir obrigatoriamente:
+- docs/COMPONENTS.md
+
+Nunca criar estilos fora do Design System.
