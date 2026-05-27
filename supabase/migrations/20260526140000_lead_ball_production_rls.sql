@@ -13,34 +13,15 @@ create policy "lead_ball_production_insert_operators"
   for insert
   to authenticated
   with check (
-    exists (
-      select 1
-      from public.profiles p
-      where p.id = auth.uid()
-        and p.role in ('admin', 'manager', 'production_operator')
-    )
+    public.get_user_role() in ('admin', 'manager', 'production_operator')
   );
 
 create policy "lead_ball_production_update_managers"
   on public.lead_ball_production
   for update
   to authenticated
-  using (
-    exists (
-      select 1
-      from public.profiles p
-      where p.id = auth.uid()
-        and p.role in ('admin', 'manager')
-    )
-  )
-  with check (
-    exists (
-      select 1
-      from public.profiles p
-      where p.id = auth.uid()
-        and p.role in ('admin', 'manager')
-    )
-  );
+  using (public.get_user_role() in ('admin', 'manager'))
+  with check (public.get_user_role() in ('admin', 'manager'));
 
 create index if not exists idx_lead_ball_production_date
   on public.lead_ball_production (date desc);

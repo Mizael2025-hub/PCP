@@ -2,6 +2,7 @@ import { AppError } from "@/lib/errors/app-error"
 import { actionSuccess, type ActionResponse } from "@/lib/utils/action-response"
 import { AuthRepository } from "@/repositories/auth-repository"
 import { BaseService } from "@/services/base-service"
+import { isAuthError } from "@supabase/supabase-js"
 import type { AuthSession } from "@/types/auth"
 import type { LoginSchema } from "@/validations/auth/login-schema"
 
@@ -61,6 +62,9 @@ export class AuthService extends BaseService {
       } = await this.repository.getUser()
 
       if (error) {
+        if (isAuthError(error) && error.name === "AuthSessionMissingError") {
+          return actionSuccess(null)
+        }
         throw error
       }
 

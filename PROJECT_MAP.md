@@ -509,47 +509,47 @@
 
 ### Fase 1: Setup e Autenticação
 
-- [x] Configuração do projeto (Next.js, Tailwind, PWA).
-- [x] Configuração de estilos globais Apple UI no Tailwind.
-- [x] Supabase SSR (client, server, middleware).
-- [x] Repositories e services base.
-- [x] Middleware de rotas privadas.
-- [x] Helpers de erro (`AppError`, `handleError`, `action-response`).
-- [ ] Setup do Supabase e tabelas de autenticação (`roles`, `profiles`).
-- [x] Criação da tela de Login (RHF + Zod + Server Actions).
-- [x] Fluxo completo de autenticação (login, logout, sessão persistente, proteção de rotas).
-- [x] Zustand global com estado de sessão (`AuthProvider`).
-- [x] Layout principal responsivo (Sidebar Desktop / Tab Bar Mobile).
+- Configuração do projeto (Next.js, Tailwind, PWA).
+- Configuração de estilos globais Apple UI no Tailwind.
+- Supabase SSR (client, server, middleware).
+- Repositories e services base.
+- Middleware de rotas privadas.
+- Helpers de erro (`AppError`, `handleError`, `action-response`).
+- Setup do Supabase e tabelas de autenticação (`roles`, `profiles`).
+- Criação da tela de Login (RHF + Zod + Server Actions).
+- Fluxo completo de autenticação (login, logout, sessão persistente, proteção de rotas).
+- Zustand global com estado de sessão (`AuthProvider`).
+- Layout principal responsivo (Sidebar Desktop / Tab Bar Mobile).
 
 ### Fase 2: Cadastros Base (Configurações)
 
-- [x] CRUD Setores (`/configuracoes/setores`) — TanStack Table, modal, soft delete, RHF + Zod.
-- [x] CRUD Turnos (`/configuracoes/turnos`) — TanStack Table, modal, exclusão física, RHF + Zod, validação date-fns.
-- [x] CRUD Funcionários (`/configuracoes/funcionarios`) — TanStack Table, modal, soft delete, RHF + Zod, select dinâmico de setores, busca e filtros.
-- [x] CRUD Máquinas (`/configuracoes/maquinas`) — TanStack Table, modal, soft delete, RHF + Zod, select dinâmico de setores, busca e filtros.
-- [x] CRUD Modelos de bateria (`/configuracoes/modelos-bateria`) — TanStack Table, modal, exclusão física, RHF + Zod, validação numérica de peso, busca e filtros por faixa de peso.
-- [x] CRUD Ligas de chumbo (`/configuracoes/ligas`) — TanStack Table, modal, exclusão física, RHF + Zod, busca e filtros por descrição.
+- CRUD Setores (`/configuracoes/setores`) — TanStack Table, modal, soft delete, RHF + Zod.
+- CRUD Turnos (`/configuracoes/turnos`) — TanStack Table, modal, exclusão física, RHF + Zod, validação date-fns.
+- CRUD Funcionários (`/configuracoes/funcionarios`) — TanStack Table, modal, soft delete, RHF + Zod, select dinâmico de setores, busca e filtros.
+- CRUD Máquinas (`/configuracoes/maquinas`) — TanStack Table, modal, soft delete, RHF + Zod, select dinâmico de setores, busca e filtros.
+- CRUD Modelos de bateria (`/configuracoes/modelos-bateria`) — TanStack Table, modal, exclusão física, RHF + Zod, validação numérica de peso, busca e filtros por faixa de peso.
+- CRUD Ligas de chumbo (`/configuracoes/ligas`) — TanStack Table, modal, exclusão física, RHF + Zod, busca e filtros por descrição.
 
 ### Fase 3: Produção (Peso)
 
-- [x] Fundidora de Grade (`/producao/grid-casting`) — formulário completo, selects dependentes, Zod, Server Actions, tabela histórica, filtros data/turno, loading/empty states, toast.
-- [x] Paradas da Fundidora (`/producao/grid-casting?tab=paradas`) — vínculo com apontamento, modal deslizante, duração automática, histórico com filtros, Zod, Server Actions, RLS.
-- [x] Boleira (`/producao/lead-ball`) — `silo_number`, `weight_produced`, tabela histórica, filtros data/turno/silo, Zod, Server Actions, RLS.
-- [x] Moinho de Óxido (`/producao/oxide-mill`) — `oxide_weight`, `oxidation_degree`, gráficos simples, tabela histórica, filtros data/turno, Zod, Server Actions, RLS.
-- [x] Misturador (`/producao/mixer`) — `batch_number`, volumes, densidade, tabela histórica, filtros data/turno/batelada, Zod, Server Actions, RLS.
-- [x] Consumo de Chumbo (`/producao/lead-consumption`) — `alloy_id`, `destination_sector_id`, gráficos simples, tabela histórica, filtros data/liga/setor, Zod, Server Actions, RLS.
+- Fundidora de Grade (`/producao/grid-casting`) — formulário completo, selects dependentes, Zod, Server Actions, tabela histórica, filtros data/turno, loading/empty states, toast.
+- Paradas da Fundidora (`/producao/grid-casting?tab=paradas`) — vínculo com apontamento, modal deslizante, duração automática, histórico com filtros, Zod, Server Actions, RLS.
+- Boleira (`/producao/lead-ball`) — `silo_number`, `weight_produced`, tabela histórica, filtros data/turno/silo, Zod, Server Actions, RLS.
+- Moinho de Óxido (`/producao/oxide-mill`) — `oxide_weight`, `oxidation_degree`, gráficos simples, tabela histórica, filtros data/turno, Zod, Server Actions, RLS.
+- Misturador (`/producao/mixer`) — `batch_number`, volumes, densidade, tabela histórica, filtros data/turno/batelada, Zod, Server Actions, RLS.
+- Consumo de Chumbo (`/producao/lead-consumption`) — `alloy_id`, `destination_sector_id`, gráficos simples, tabela histórica, filtros data/liga/setor, Zod, Server Actions, RLS.
 
 ### Fase 4: Rastreabilidade e Qualidade
 
-- [x] Empastadeira (`/producao/pasting`) — geração automática de EP Code, rastreabilidade, histórico com filtros data/turno/EP/modelo, Zod, Server Actions, RLS.
-- [x] Lixação (`/producao/sanding-scrap`) — `scrap_weight`, `plates_qty_lost`, gráficos simples, histórico com filtros data/operador, Zod, Server Actions, RLS.
-- [x] Laboratório (`/qualidade/laboratorio`) — `mass_density`, `acid_concentration`, `temperature` (nullable), `status`, histórico com filtros, Zod, Server Actions, RLS.
-- [x] Montagem (`/producao/assembly`) — geração automática de lote da bateria, EP Code de origem, `lot_characteristics` JSONB dinâmico, histórico com filtros, Zod, Server Actions, RLS.
-- [x] Formação (`/qualidade/formacao`) — master-detail, linhas dinâmicas ilimitadas, lote `FORM-*`, histórico expandível, filtros data/status/operador, Zod, Server Actions, RLS.
+- Empastadeira (`/producao/pasting`) — geração automática de EP Code, rastreabilidade, histórico com filtros data/turno/EP/modelo, Zod, Server Actions, RLS.
+- Lixação (`/producao/sanding-scrap`) — `scrap_weight`, `plates_qty_lost`, gráficos simples, histórico com filtros data/operador, Zod, Server Actions, RLS.
+- Laboratório (`/qualidade/laboratorio`) — `mass_density`, `acid_concentration`, `temperature` (nullable), `status`, histórico com filtros, Zod, Server Actions, RLS.
+- Montagem (`/producao/assembly`) — geração automática de lote da bateria, EP Code de origem, `lot_characteristics` JSONB dinâmico, histórico com filtros, Zod, Server Actions, RLS.
+- Formação (`/qualidade/formacao`) — master-detail, linhas dinâmicas ilimitadas, lote `FORM-*`, histórico expandível, filtros data/status/operador, Zod, Server Actions, RLS.
 
 ### Fase 5: Relatórios e Estoque
 
-- [x] Relatórios (`/relatorios`) — dashboard consolidado, filtros globais data/turno/setor, KPIs, gráficos SimpleBarChart, tabela resumo por módulo, loading/skeleton, Server Components.
-- [x] Balanço de massa (`/relatorios/balanco-massa`) — cruzamento lead_consumption + mixer + grid_casting + sanding_scrap, cálculos automáticos de saldo/desvio/rendimento, gráficos, indicadores, queries otimizadas.
-- [x] Dashboard de perdas (`/relatorios/perdas`) — cruzamento lixação + empastadeira, filtros por período, KPIs, gráficos, tabelas resumo, payload Excel preparado.
-- [ ] Estoque (`/estoque`) — controle de materiais e insumos.
+- Relatórios (`/relatorios`) — dashboard consolidado, filtros globais data/turno/setor, KPIs, gráficos SimpleBarChart, tabela resumo por módulo, loading/skeleton, Server Components.
+- Balanço de massa (`/relatorios/balanco-massa`) — cruzamento lead_consumption + mixer + grid_casting + sanding_scrap, cálculos automáticos de saldo/desvio/rendimento, gráficos, indicadores, queries otimizadas.
+- Dashboard de perdas (`/relatorios/perdas`) — cruzamento lixação + empastadeira, filtros por período, KPIs, gráficos, tabelas resumo, payload Excel preparado.
+- Estoque (`/estoque`) — controle de materiais e insumos.

@@ -14,34 +14,15 @@ create policy "formation_records_insert_operators"
   for insert
   to authenticated
   with check (
-    exists (
-      select 1
-      from public.profiles p
-      where p.id = auth.uid()
-        and p.role in ('admin', 'manager', 'production_operator', 'lab_technician')
-    )
+    public.get_user_role() in ('admin', 'manager', 'production_operator', 'lab_technician')
   );
 
 create policy "formation_records_update_managers"
   on public.formation_records
   for update
   to authenticated
-  using (
-    exists (
-      select 1
-      from public.profiles p
-      where p.id = auth.uid()
-        and p.role in ('admin', 'manager', 'lab_technician')
-    )
-  )
-  with check (
-    exists (
-      select 1
-      from public.profiles p
-      where p.id = auth.uid()
-        and p.role in ('admin', 'manager', 'lab_technician')
-    )
-  );
+  using (public.get_user_role() in ('admin', 'manager', 'lab_technician'))
+  with check (public.get_user_role() in ('admin', 'manager', 'lab_technician'));
 
 create policy "formation_details_select_authenticated"
   on public.formation_details
@@ -54,47 +35,21 @@ create policy "formation_details_insert_operators"
   for insert
   to authenticated
   with check (
-    exists (
-      select 1
-      from public.profiles p
-      where p.id = auth.uid()
-        and p.role in ('admin', 'manager', 'production_operator', 'lab_technician')
-    )
+    public.get_user_role() in ('admin', 'manager', 'production_operator', 'lab_technician')
   );
 
 create policy "formation_details_update_managers"
   on public.formation_details
   for update
   to authenticated
-  using (
-    exists (
-      select 1
-      from public.profiles p
-      where p.id = auth.uid()
-        and p.role in ('admin', 'manager', 'lab_technician')
-    )
-  )
-  with check (
-    exists (
-      select 1
-      from public.profiles p
-      where p.id = auth.uid()
-        and p.role in ('admin', 'manager', 'lab_technician')
-    )
-  );
+  using (public.get_user_role() in ('admin', 'manager', 'lab_technician'))
+  with check (public.get_user_role() in ('admin', 'manager', 'lab_technician'));
 
 create policy "formation_details_delete_managers"
   on public.formation_details
   for delete
   to authenticated
-  using (
-    exists (
-      select 1
-      from public.profiles p
-      where p.id = auth.uid()
-        and p.role in ('admin', 'manager', 'lab_technician')
-    )
-  );
+  using (public.get_user_role() in ('admin', 'manager', 'lab_technician'));
 
 create index if not exists idx_formation_records_start_date
   on public.formation_records (start_date desc);

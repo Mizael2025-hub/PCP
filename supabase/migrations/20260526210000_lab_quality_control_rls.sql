@@ -13,34 +13,15 @@ create policy "lab_quality_control_insert_technicians"
   for insert
   to authenticated
   with check (
-    exists (
-      select 1
-      from public.profiles p
-      where p.id = auth.uid()
-        and p.role in ('admin', 'manager', 'lab_technician')
-    )
+    public.get_user_role() in ('admin', 'manager', 'lab_technician')
   );
 
 create policy "lab_quality_control_update_technicians"
   on public.lab_quality_control
   for update
   to authenticated
-  using (
-    exists (
-      select 1
-      from public.profiles p
-      where p.id = auth.uid()
-        and p.role in ('admin', 'manager', 'lab_technician')
-    )
-  )
-  with check (
-    exists (
-      select 1
-      from public.profiles p
-      where p.id = auth.uid()
-        and p.role in ('admin', 'manager', 'lab_technician')
-    )
-  );
+  using (public.get_user_role() in ('admin', 'manager', 'lab_technician'))
+  with check (public.get_user_role() in ('admin', 'manager', 'lab_technician'));
 
 create index if not exists idx_lab_quality_control_date
   on public.lab_quality_control (date desc);

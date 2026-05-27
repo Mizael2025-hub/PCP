@@ -13,34 +13,15 @@ create policy "sanding_scrap_insert_operators"
   for insert
   to authenticated
   with check (
-    exists (
-      select 1
-      from public.profiles p
-      where p.id = auth.uid()
-        and p.role in ('admin', 'manager', 'production_operator')
-    )
+    public.get_user_role() in ('admin', 'manager', 'production_operator')
   );
 
 create policy "sanding_scrap_update_managers"
   on public.sanding_scrap
   for update
   to authenticated
-  using (
-    exists (
-      select 1
-      from public.profiles p
-      where p.id = auth.uid()
-        and p.role in ('admin', 'manager')
-    )
-  )
-  with check (
-    exists (
-      select 1
-      from public.profiles p
-      where p.id = auth.uid()
-        and p.role in ('admin', 'manager')
-    )
-  );
+  using (public.get_user_role() in ('admin', 'manager'))
+  with check (public.get_user_role() in ('admin', 'manager'));
 
 create index if not exists idx_sanding_scrap_date
   on public.sanding_scrap (date desc);
