@@ -13,6 +13,8 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select } from "@/components/ui/select"
+import { enqueueOutbox } from "@/lib/offline/outbox"
+import { toastFromActionResponse } from "@/lib/utils/toast-action"
 import type { EmployeeWithSector } from "@/types/employee"
 import type { SandingScrapWithRelations } from "@/types/sanding-scrap"
 import {
@@ -78,17 +80,40 @@ export function SandingScrapForm({
         plates_qty_lost: data.plates_qty_lost
       }
 
-      const result = isEditing
-        ? await updateSandingScrapAction({ id: record!.id, ...payload })
-        : await createSandingScrapAction(payload)
+      if (!navigator.onLine) {
+        if (isEditing) {
+          await enqueueOutbox("sanding_scrap_update", {
+            id: record!.id,
+            updated_at: record!.updated_at,
+            ...payload
+          })
+        } else {
+          await enqueueOutbox("sanding_scrap_create", payload)
+        }
 
-      if (!result.success) {
-        toast.error(result.message ?? "Erro ao salvar apontamento.")
+        toast.success(
+          "Salvo no dispositivo. Enviaremos quando a internet voltar."
+        )
+        onSuccess()
         return
       }
 
-      toast.success(result.message ?? "Apontamento salvo com sucesso.")
-      onSuccess()
+      const result = isEditing
+        ? await updateSandingScrapAction({
+            id: record!.id,
+            updated_at: record!.updated_at,
+            ...payload
+          })
+        : await createSandingScrapAction(payload)
+
+      if (
+        toastFromActionResponse(result, {
+          successFallback: "Apontamento salvo com sucesso.",
+          errorFallback: "Erro ao salvar apontamento."
+        })
+      ) {
+        onSuccess()
+      }
     } catch (error) {
       console.error("[SandingScrapForm.onSubmit]", error)
       toast.error("Erro interno.")

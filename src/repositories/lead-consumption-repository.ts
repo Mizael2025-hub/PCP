@@ -1,4 +1,5 @@
 import { BaseRepository } from "@/repositories/base-repository"
+import { AppError } from "@/lib/errors/app-error"
 import type {
   LeadConsumption,
   LeadConsumptionInsert,
@@ -77,19 +78,26 @@ export class LeadConsumptionRepository extends BaseRepository {
 
   async update(
     id: string,
-    input: LeadConsumptionUpdate
+    input: LeadConsumptionUpdate,
+    expectedUpdatedAt?: string
   ): Promise<LeadConsumption> {
     const client = await this.getClient()
 
-    const { data, error } = await client
-      .from("lead_consumption")
-      .update(input)
-      .eq("id", id)
-      .select("*")
-      .single()
+    let query = client.from("lead_consumption").update(input).eq("id", id)
+    if (expectedUpdatedAt) {
+      query = query.eq("updated_at", expectedUpdatedAt)
+    }
+
+    const { data, error } = await query.select("*").maybeSingle()
 
     if (error) {
       throw error
+    }
+
+    if (!data) {
+      throw AppError.conflict(
+        "Registro foi alterado por outra pessoa. Recarregue e tente novamente."
+      )
     }
 
     return data

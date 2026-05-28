@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select } from "@/components/ui/select"
+import { toastFromActionResponse } from "@/lib/utils/toast-action"
 import type { MachineWithSector } from "@/types/machine"
 import type { Sector } from "@/types/sector"
 import {
@@ -73,13 +74,14 @@ export function MachineForm({
           })
         : await createMachineAction(data)
 
-      if (!result.success) {
-        toast.error(result.message ?? "Erro ao salvar máquina.")
-        return
+      if (
+        toastFromActionResponse(result, {
+          successFallback: "Máquina salva com sucesso.",
+          errorFallback: "Erro ao salvar máquina."
+        })
+      ) {
+        onSuccess()
       }
-
-      toast.success(result.message ?? "Máquina salva com sucesso.")
-      onSuccess()
     } catch (error) {
       console.error("[MachineForm.onSubmit]", error)
       toast.error("Erro interno.")

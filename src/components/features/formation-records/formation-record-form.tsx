@@ -13,6 +13,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select } from "@/components/ui/select"
 import { isoToDatetimeLocal } from "@/lib/utils/datetime"
+import { enqueueOutbox } from "@/lib/offline/outbox"
+import { toastFromActionResponse } from "@/lib/utils/toast-action"
 import type { EmployeeWithSector } from "@/types/employee"
 import type { FormationRecordWithRelations } from "@/types/formation-record"
 import {
@@ -122,17 +124,40 @@ export function FormationRecordForm({
         lines: data.lines
       }
 
-      const result = isEditing
-        ? await updateFormationRecordAction({ id: record!.id, ...payload })
-        : await createFormationRecordAction(payload)
+      if (!navigator.onLine) {
+        if (isEditing) {
+          await enqueueOutbox("formation_update", {
+            id: record!.id,
+            updated_at: record!.updated_at,
+            ...payload
+          })
+        } else {
+          await enqueueOutbox("formation_create", payload)
+        }
 
-      if (!result.success) {
-        toast.error(result.message ?? "Erro ao salvar formação.")
+        toast.success(
+          "Salvo no dispositivo. Enviaremos quando a internet voltar."
+        )
+        onSuccess()
         return
       }
 
-      toast.success(result.message ?? "Formação salva com sucesso.")
-      onSuccess()
+      const result = isEditing
+        ? await updateFormationRecordAction({
+            id: record!.id,
+            updated_at: record!.updated_at,
+            ...payload
+          })
+        : await createFormationRecordAction(payload)
+
+      if (
+        toastFromActionResponse(result, {
+          successFallback: "Formação salva com sucesso.",
+          errorFallback: "Erro ao salvar formação."
+        })
+      ) {
+        onSuccess()
+      }
     } catch (error) {
       console.error("[FormationRecordForm.onSubmit]", error)
       toast.error("Erro interno.")

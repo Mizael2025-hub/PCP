@@ -9,6 +9,7 @@ import { deleteShiftAction } from "@/actions/shift-actions"
 import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Modal } from "@/components/ui/modal"
+import { toastFromActionResponse } from "@/lib/utils/toast-action"
 import { formatTimeDisplay } from "@/lib/utils/time"
 import type { Shift } from "@/types/shift"
 
@@ -63,12 +64,12 @@ export function ShiftsManager({ initialShifts }: ShiftsManagerProps) {
     try {
       const result = await deleteShiftAction(deletingShift.id)
 
-      if (!result.success) {
-        toast.error(result.message ?? "Erro ao excluir turno.")
-        return
-      }
+      const ok = toastFromActionResponse(result, {
+        successFallback: "Turno excluído com sucesso.",
+        errorFallback: "Erro ao excluir turno."
+      })
+      if (!ok) return
 
-      toast.success(result.message ?? "Turno excluído com sucesso.")
       closeDeleteConfirm()
       handleRefresh()
     } catch (error) {
@@ -133,7 +134,7 @@ export function ShiftsManager({ initialShifts }: ShiftsManagerProps) {
               {formatTimeDisplay(deletingShift.end_time)})
             </>
           ) : null}
-          ? Esta ação não pode ser desfeita.
+          ? O registro será desativado e não aparecerá mais na listagem.
         </p>
 
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">

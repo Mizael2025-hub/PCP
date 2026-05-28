@@ -10,7 +10,13 @@ Permitir operação sem internet.
 
 ## Banco local
 
-- IndexedDB
+- IndexedDB (Dexie)
+
+## Implementação (status atual)
+
+- Outbox (fila) persistida em `IndexedDB` via Dexie: `src/lib/offline/*`
+- Provider de sincronização (foreground): `src/components/providers/offline-sync-provider.tsx`
+- Forms de produção: ao detectar offline, enfileiram operação e exibem toast “Salvo no dispositivo…”
 
 ## Sincronização
 

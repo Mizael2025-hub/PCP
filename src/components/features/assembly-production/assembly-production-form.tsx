@@ -14,6 +14,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select } from "@/components/ui/select"
 import { jsonToCharacteristicEntries } from "@/lib/utils/lot-characteristics"
+import { enqueueOutbox } from "@/lib/offline/outbox"
+import { toastFromActionResponse } from "@/lib/utils/toast-action"
 import type { AssemblyProductionWithRelations } from "@/types/assembly-production"
 import type { EmployeeWithSector } from "@/types/employee"
 import type { MachineWithSector } from "@/types/machine"
@@ -73,7 +75,9 @@ export function AssemblyProductionForm({
         operator_id: record.operator_id,
         battery_model_id: record.pasting_production.battery_model_id,
         plates_qty: record.pasting_production.plates_qty,
-        created_at: record.created_at
+        created_at: record.pasting_production.created_at,
+        updated_at: record.pasting_production.updated_at,
+        created_by: record.pasting_production.created_by
       })
     }
 
@@ -214,17 +218,40 @@ export function AssemblyProductionForm({
         characteristics: data.characteristics
       }
 
-      const result = isEditing
-        ? await updateAssemblyAction({ id: record!.id, ...payload })
-        : await createAssemblyAction(payload)
+      if (!navigator.onLine) {
+        if (isEditing) {
+          await enqueueOutbox("assembly_update", {
+            id: record!.id,
+            updated_at: record!.updated_at,
+            ...payload
+          })
+        } else {
+          await enqueueOutbox("assembly_create", payload)
+        }
 
-      if (!result.success) {
-        toast.error(result.message ?? "Erro ao salvar apontamento.")
+        toast.success(
+          "Salvo no dispositivo. Enviaremos quando a internet voltar."
+        )
+        onSuccess()
         return
       }
 
-      toast.success(result.message ?? "Apontamento salvo com sucesso.")
-      onSuccess()
+      const result = isEditing
+        ? await updateAssemblyAction({
+            id: record!.id,
+            updated_at: record!.updated_at,
+            ...payload
+          })
+        : await createAssemblyAction(payload)
+
+      if (
+        toastFromActionResponse(result, {
+          successFallback: "Apontamento salvo com sucesso.",
+          errorFallback: "Erro ao salvar apontamento."
+        })
+      ) {
+        onSuccess()
+      }
     } catch (error) {
       console.error("[AssemblyProductionForm.onSubmit]", error)
       toast.error("Erro interno.")

@@ -32,6 +32,9 @@ export type AssemblyPastingRef = {
   date: string
   battery_model_id: string
   plates_qty: number
+  created_at: string
+  updated_at: string
+  created_by: string | null
 }
 
 export type AssemblyBatteryModelRef = {

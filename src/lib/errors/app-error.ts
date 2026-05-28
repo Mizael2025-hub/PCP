@@ -18,4 +18,8 @@ export class AppError extends Error {
   static notFound(message = "Recurso não encontrado.") {
     return new AppError(message, 404)
   }
+
+  static conflict(message = "Conflito de atualização.") {
+    return new AppError(message, 409)
+  }
 }

@@ -6,6 +6,7 @@ import { useState } from "react"
 import { toast } from "sonner"
 
 import { logoutAction } from "@/actions/auth-actions"
+import { toastFromActionResponse } from "@/lib/utils/toast-action"
 import { useAppStore } from "@/stores/app-store"
 
 export function LogoutButton() {
@@ -20,10 +21,11 @@ export function LogoutButton() {
     try {
       const result = await logoutAction()
 
-      if (!result.success) {
-        toast.error(result.message ?? "Erro ao sair.")
-        return
-      }
+      const ok = toastFromActionResponse(result, {
+        errorFallback: "Erro ao sair.",
+        showSuccess: false
+      })
+      if (!ok) return
 
       clearAuth()
       router.push("/login")

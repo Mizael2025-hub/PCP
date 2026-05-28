@@ -165,12 +165,16 @@ export class FormationRecordService extends BaseService {
       const startIso = datetimeLocalToIso(input.start_date)
       const endIso = input.end_date ? datetimeLocalToIso(input.end_date) : null
 
-      const record = await this.recordRepository.update(input.id, {
-        start_date: startIso,
-        end_date: endIso,
-        operator_id: input.operator_id,
-        status: input.status
-      })
+      const record = await this.recordRepository.update(
+        input.id,
+        {
+          start_date: startIso,
+          end_date: endIso,
+          operator_id: input.operator_id,
+          status: input.status
+        },
+        input.updated_at
+      )
 
       const details = await this.detailRepository.replaceForFormation(
         record.id,

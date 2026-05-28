@@ -13,6 +13,8 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select } from "@/components/ui/select"
+import { enqueueOutbox } from "@/lib/offline/outbox"
+import { toastFromActionResponse } from "@/lib/utils/toast-action"
 import type { EmployeeWithSector } from "@/types/employee"
 import type { OxideMillProductionWithRelations } from "@/types/oxide-mill-production"
 import type { Shift } from "@/types/shift"
@@ -93,17 +95,40 @@ export function OxideMillProductionForm({
         oxidation_degree: data.oxidation_degree
       }
 
-      const result = isEditing
-        ? await updateOxideMillAction({ id: record!.id, ...payload })
-        : await createOxideMillAction(payload)
+      if (!navigator.onLine) {
+        if (isEditing) {
+          await enqueueOutbox("oxide_mill_update", {
+            id: record!.id,
+            updated_at: record!.updated_at,
+            ...payload
+          })
+        } else {
+          await enqueueOutbox("oxide_mill_create", payload)
+        }
 
-      if (!result.success) {
-        toast.error(result.message ?? "Erro ao salvar apontamento.")
+        toast.success(
+          "Salvo no dispositivo. Enviaremos quando a internet voltar."
+        )
+        onSuccess()
         return
       }
 
-      toast.success(result.message ?? "Apontamento salvo com sucesso.")
-      onSuccess()
+      const result = isEditing
+        ? await updateOxideMillAction({
+            id: record!.id,
+            updated_at: record!.updated_at,
+            ...payload
+          })
+        : await createOxideMillAction(payload)
+
+      if (
+        toastFromActionResponse(result, {
+          successFallback: "Apontamento salvo com sucesso.",
+          errorFallback: "Erro ao salvar apontamento."
+        })
+      ) {
+        onSuccess()
+      }
     } catch (error) {
       console.error("[OxideMillProductionForm.onSubmit]", error)
       toast.error("Erro interno.")

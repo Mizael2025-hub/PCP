@@ -9,6 +9,7 @@ import { deleteMachineAction } from "@/actions/machine-actions"
 import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Modal } from "@/components/ui/modal"
+import { toastFromActionResponse } from "@/lib/utils/toast-action"
 import type { MachineWithSector } from "@/types/machine"
 import type { Sector } from "@/types/sector"
 
@@ -77,12 +78,12 @@ export function MachinesManager({
     try {
       const result = await deleteMachineAction(deletingMachine.id)
 
-      if (!result.success) {
-        toast.error(result.message ?? "Erro ao excluir máquina.")
-        return
-      }
+      const ok = toastFromActionResponse(result, {
+        successFallback: "Máquina desativada com sucesso.",
+        errorFallback: "Erro ao excluir máquina."
+      })
+      if (!ok) return
 
-      toast.success(result.message ?? "Máquina excluída com sucesso.")
       closeDeleteConfirm()
       handleRefresh()
     } catch (error) {

@@ -13,6 +13,8 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select } from "@/components/ui/select"
+import { enqueueOutbox } from "@/lib/offline/outbox"
+import { toastFromActionResponse } from "@/lib/utils/toast-action"
 import type { LeadAlloy } from "@/types/lead-alloy"
 import type { LeadConsumptionWithRelations } from "@/types/lead-consumption"
 import type { Sector } from "@/types/sector"
@@ -94,17 +96,40 @@ export function LeadConsumptionForm({
         weight_consumed: data.weight_consumed
       }
 
-      const result = isEditing
-        ? await updateLeadConsumptionAction({ id: record!.id, ...payload })
-        : await createLeadConsumptionAction(payload)
+      if (!navigator.onLine) {
+        if (isEditing) {
+          await enqueueOutbox("lead_consumption_update", {
+            id: record!.id,
+            updated_at: record!.updated_at,
+            ...payload
+          })
+        } else {
+          await enqueueOutbox("lead_consumption_create", payload)
+        }
 
-      if (!result.success) {
-        toast.error(result.message ?? "Erro ao salvar apontamento.")
+        toast.success(
+          "Salvo no dispositivo. Enviaremos quando a internet voltar."
+        )
+        onSuccess()
         return
       }
 
-      toast.success(result.message ?? "Apontamento salvo com sucesso.")
-      onSuccess()
+      const result = isEditing
+        ? await updateLeadConsumptionAction({
+            id: record!.id,
+            updated_at: record!.updated_at,
+            ...payload
+          })
+        : await createLeadConsumptionAction(payload)
+
+      if (
+        toastFromActionResponse(result, {
+          successFallback: "Apontamento salvo com sucesso.",
+          errorFallback: "Erro ao salvar apontamento."
+        })
+      ) {
+        onSuccess()
+      }
     } catch (error) {
       console.error("[LeadConsumptionForm.onSubmit]", error)
       toast.error("Erro interno.")

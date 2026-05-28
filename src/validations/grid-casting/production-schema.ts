@@ -51,7 +51,10 @@ export const createGridCastingSchema =
 
 export const updateGridCastingSchema = createGridCastingSchema.and(
   z.object({
-    id: z.string().uuid("ID inválido.")
+    id: z.string().uuid("ID inválido."),
+    updated_at: z
+      .string()
+      .min(1, "Registro desatualizado. Recarregue a página.")
   })
 )
 

@@ -11,6 +11,7 @@ import {
 } from "@/actions/battery-model-actions"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { toastFromActionResponse } from "@/lib/utils/toast-action"
 import type { BatteryModel } from "@/types/battery-model"
 import {
   batteryModelFormSchema,
@@ -70,19 +71,21 @@ export function BatteryModelForm({
       const result = isEditing
         ? await updateBatteryModelAction({
             id: batteryModel!.id,
+            updated_at: batteryModel!.updated_at,
             code: data.code,
             name: data.name,
             weight_specification: data.weight_specification
           })
         : await createBatteryModelAction(data)
 
-      if (!result.success) {
-        toast.error(result.message ?? "Erro ao salvar modelo de bateria.")
-        return
+      if (
+        toastFromActionResponse(result, {
+          successFallback: "Modelo de bateria salvo com sucesso.",
+          errorFallback: "Erro ao salvar modelo de bateria."
+        })
+      ) {
+        onSuccess()
       }
-
-      toast.success(result.message ?? "Modelo de bateria salvo com sucesso.")
-      onSuccess()
     } catch (error) {
       console.error("[BatteryModelForm.onSubmit]", error)
       toast.error("Erro interno.")

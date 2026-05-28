@@ -8,6 +8,7 @@ import { toast } from "sonner"
 import { createShiftAction, updateShiftAction } from "@/actions/shift-actions"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { toastFromActionResponse } from "@/lib/utils/toast-action"
 import { formatTimeDisplay } from "@/lib/utils/time"
 import type { Shift } from "@/types/shift"
 import {
@@ -49,16 +50,18 @@ export function ShiftForm({ shift, onSuccess, onCancel }: ShiftFormProps) {
   async function onSubmit(data: ShiftFormSchema) {
     try {
       const result = isEditing
-        ? await updateShiftAction({ id: shift!.id, ...data })
+        ? await updateShiftAction({
+            id: shift!.id,
+            updated_at: shift!.updated_at,
+            ...data
+          })
         : await createShiftAction(data)
 
-      if (!result.success) {
-        toast.error(result.message ?? "Erro ao salvar turno.")
-        return
+      if (
+        toastFromActionResponse(result, { successFallback: "Turno salvo." })
+      ) {
+        onSuccess()
       }
-
-      toast.success(result.message ?? "Turno salvo com sucesso.")
-      onSuccess()
     } catch (error) {
       console.error("[ShiftForm.onSubmit]", error)
       toast.error("Erro interno.")

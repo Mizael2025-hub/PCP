@@ -17,6 +17,8 @@ import {
   formatDurationLabel,
   isoToDatetimeLocal
 } from "@/lib/utils/datetime"
+import { enqueueOutbox } from "@/lib/offline/outbox"
+import { toastFromActionResponse } from "@/lib/utils/toast-action"
 import type { GridCastingProductionWithRelations } from "@/types/grid-casting"
 import type { GridCastingDowntimeWithProduction } from "@/types/grid-casting-downtime"
 import {
@@ -100,17 +102,40 @@ export function GridCastingDowntimeForm({
 
   async function onSubmit(data: GridCastingDowntimeFormSchema) {
     try {
-      const result = isEditing
-        ? await updateGridCastingDowntimeAction({ id: record!.id, ...data })
-        : await createGridCastingDowntimeAction(data)
+      if (!navigator.onLine) {
+        if (isEditing) {
+          await enqueueOutbox("grid_casting_downtime_update", {
+            id: record!.id,
+            updated_at: record!.updated_at,
+            ...data
+          })
+        } else {
+          await enqueueOutbox("grid_casting_downtime_create", data)
+        }
 
-      if (!result.success) {
-        toast.error(result.message ?? "Erro ao salvar parada.")
+        toast.success(
+          "Salvo no dispositivo. Enviaremos quando a internet voltar."
+        )
+        onSuccess()
         return
       }
 
-      toast.success(result.message ?? "Parada salva com sucesso.")
-      onSuccess()
+      const result = isEditing
+        ? await updateGridCastingDowntimeAction({
+            id: record!.id,
+            updated_at: record!.updated_at,
+            ...data
+          })
+        : await createGridCastingDowntimeAction(data)
+
+      if (
+        toastFromActionResponse(result, {
+          successFallback: "Parada salva com sucesso.",
+          errorFallback: "Erro ao salvar parada."
+        })
+      ) {
+        onSuccess()
+      }
     } catch (error) {
       console.error("[GridCastingDowntimeForm.onSubmit]", error)
       toast.error("Erro interno.")

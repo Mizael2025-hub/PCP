@@ -11,6 +11,7 @@ import {
 } from "@/actions/lead-alloy-actions"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { toastFromActionResponse } from "@/lib/utils/toast-action"
 import type { LeadAlloy } from "@/types/lead-alloy"
 import {
   leadAlloyFormSchema,
@@ -56,18 +57,15 @@ export function LeadAlloyForm({
       const result = isEditing
         ? await updateLeadAlloyAction({
             id: leadAlloy!.id,
+            updated_at: leadAlloy!.updated_at,
             code: data.code,
             description: data.description
           })
         : await createLeadAlloyAction(data)
 
-      if (!result.success) {
-        toast.error(result.message ?? "Erro ao salvar liga.")
-        return
+      if (toastFromActionResponse(result, { successFallback: "Liga salva." })) {
+        onSuccess()
       }
-
-      toast.success(result.message ?? "Liga salva com sucesso.")
-      onSuccess()
     } catch (error) {
       console.error("[LeadAlloyForm.onSubmit]", error)
       toast.error("Erro interno.")

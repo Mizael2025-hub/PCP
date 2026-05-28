@@ -95,13 +95,17 @@ export class LeadBallProductionService extends BaseService {
 
       await this.assertReferences(input)
 
-      const record = await this.repository.update(input.id, {
-        date: input.date,
-        shift_id: input.shift_id,
-        operator_id: input.operator_id,
-        weight_produced: input.weight_produced,
-        silo_number: input.silo_number
-      })
+      const record = await this.repository.update(
+        input.id,
+        {
+          date: input.date,
+          shift_id: input.shift_id,
+          operator_id: input.operator_id,
+          weight_produced: input.weight_produced,
+          silo_number: input.silo_number
+        },
+        input.updated_at
+      )
 
       const [shifts, employees] = await Promise.all([
         this.shiftRepository.findAll(),

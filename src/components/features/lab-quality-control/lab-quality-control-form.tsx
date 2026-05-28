@@ -15,6 +15,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select } from "@/components/ui/select"
 import { computeMassDensity, formatMassDensity } from "@/lib/utils/mass-density"
+import { enqueueOutbox } from "@/lib/offline/outbox"
+import { toastFromActionResponse } from "@/lib/utils/toast-action"
 import type { MixerProduction } from "@/types/mixer-production"
 import type { LabQualityControlWithRelations } from "@/types/lab-quality-control"
 import {
@@ -114,17 +116,40 @@ export function LabQualityControlForm({
         notes: data.notes
       }
 
-      const result = isEditing
-        ? await updateLabQualityControlAction({ id: record!.id, ...payload })
-        : await createLabQualityControlAction(payload)
+      if (!navigator.onLine) {
+        if (isEditing) {
+          await enqueueOutbox("lab_qc_update", {
+            id: record!.id,
+            updated_at: record!.updated_at,
+            ...payload
+          })
+        } else {
+          await enqueueOutbox("lab_qc_create", payload)
+        }
 
-      if (!result.success) {
-        toast.error(result.message ?? "Erro ao salvar análise.")
+        toast.success(
+          "Salvo no dispositivo. Enviaremos quando a internet voltar."
+        )
+        onSuccess()
         return
       }
 
-      toast.success(result.message ?? "Análise salva com sucesso.")
-      onSuccess()
+      const result = isEditing
+        ? await updateLabQualityControlAction({
+            id: record!.id,
+            updated_at: record!.updated_at,
+            ...payload
+          })
+        : await createLabQualityControlAction(payload)
+
+      if (
+        toastFromActionResponse(result, {
+          successFallback: "Análise salva com sucesso.",
+          errorFallback: "Erro ao salvar análise."
+        })
+      ) {
+        onSuccess()
+      }
     } catch (error) {
       console.error("[LabQualityControlForm.onSubmit]", error)
       toast.error("Erro interno.")

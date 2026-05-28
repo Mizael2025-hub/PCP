@@ -96,13 +96,17 @@ export class OxideMillProductionService extends BaseService {
 
       await this.assertReferences(input)
 
-      const record = await this.repository.update(input.id, {
-        date: input.date,
-        shift_id: input.shift_id,
-        operator_id: input.operator_id,
-        oxide_weight: input.oxide_weight,
-        oxidation_degree: input.oxidation_degree
-      })
+      const record = await this.repository.update(
+        input.id,
+        {
+          date: input.date,
+          shift_id: input.shift_id,
+          operator_id: input.operator_id,
+          oxide_weight: input.oxide_weight,
+          oxidation_degree: input.oxidation_degree
+        },
+        input.updated_at
+      )
 
       const [shifts, employees] = await Promise.all([
         this.shiftRepository.findAll(),

@@ -17,21 +17,12 @@ function isUniqueViolation(error: unknown): boolean {
   )
 }
 
-function isForeignKeyViolation(error: unknown): boolean {
-  return (
-    typeof error === "object" &&
-    error !== null &&
-    "code" in error &&
-    (error as { code: string }).code === "23503"
-  )
-}
-
 export class ShiftService extends BaseService {
   private readonly repository = new ShiftRepository()
 
   async list(): Promise<ActionResponse<Shift[]>> {
     try {
-      const shifts = await this.repository.findAll()
+      const shifts = await this.repository.findAll(true)
       return actionSuccess(shifts)
     } catch (error) {
       return this.handleError("ShiftService.list", error)
@@ -63,15 +54,19 @@ export class ShiftService extends BaseService {
     try {
       const existing = await this.repository.findById(input.id)
 
-      if (!existing) {
+      if (!existing || !existing.is_active) {
         throw AppError.notFound("Turno não encontrado.")
       }
 
-      const shift = await this.repository.update(input.id, {
-        name: input.name,
-        start_time: input.start_time,
-        end_time: input.end_time
-      })
+      const shift = await this.repository.update(
+        input.id,
+        {
+          name: input.name,
+          start_time: input.start_time,
+          end_time: input.end_time
+        },
+        input.updated_at
+      )
 
       return actionSuccess(shift, "Turno atualizado com sucesso.")
     } catch (error) {
@@ -90,23 +85,14 @@ export class ShiftService extends BaseService {
     try {
       const existing = await this.repository.findById(id)
 
-      if (!existing) {
+      if (!existing || !existing.is_active) {
         throw AppError.notFound("Turno não encontrado.")
       }
 
       await this.repository.remove(id)
 
-      return actionSuccess(undefined, "Turno excluído com sucesso.")
+      return actionSuccess(undefined, "Turno desativado com sucesso.")
     } catch (error) {
-      if (isForeignKeyViolation(error)) {
-        return this.handleError(
-          "ShiftService.remove",
-          AppError.badRequest(
-            "Não é possível excluir: o turno está em uso na produção."
-          )
-        )
-      }
-
       return this.handleError("ShiftService.remove", error)
     }
   }

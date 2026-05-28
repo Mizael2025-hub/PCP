@@ -88,12 +88,16 @@ export class SandingScrapService extends BaseService {
 
       await this.assertReferences(input)
 
-      const record = await this.repository.update(input.id, {
-        date: input.date,
-        operator_id: input.operator_id,
-        scrap_weight: input.scrap_weight,
-        plates_qty_lost: input.plates_qty_lost
-      })
+      const record = await this.repository.update(
+        input.id,
+        {
+          date: input.date,
+          operator_id: input.operator_id,
+          scrap_weight: input.scrap_weight,
+          plates_qty_lost: input.plates_qty_lost
+        },
+        input.updated_at
+      )
 
       const employees = await this.employeeRepository.findAll(true)
       const [withRelations] = this.attachRelations([record], employees)

@@ -17,21 +17,12 @@ function isUniqueViolation(error: unknown): boolean {
   )
 }
 
-function isForeignKeyViolation(error: unknown): boolean {
-  return (
-    typeof error === "object" &&
-    error !== null &&
-    "code" in error &&
-    (error as { code: string }).code === "23503"
-  )
-}
-
 export class BatteryModelService extends BaseService {
   private readonly repository = new BatteryModelRepository()
 
   async list(): Promise<ActionResponse<BatteryModel[]>> {
     try {
-      const batteryModels = await this.repository.findAll()
+      const batteryModels = await this.repository.findAll(true)
       return actionSuccess(batteryModels)
     } catch (error) {
       return this.handleError("BatteryModelService.list", error)
@@ -70,15 +61,19 @@ export class BatteryModelService extends BaseService {
     try {
       const existing = await this.repository.findById(input.id)
 
-      if (!existing) {
+      if (!existing || !existing.is_active) {
         throw AppError.notFound("Modelo de bateria não encontrado.")
       }
 
-      const batteryModel = await this.repository.update(input.id, {
-        code: input.code,
-        name: input.name,
-        weight_specification: input.weight_specification
-      })
+      const batteryModel = await this.repository.update(
+        input.id,
+        {
+          code: input.code,
+          name: input.name,
+          weight_specification: input.weight_specification
+        },
+        input.updated_at
+      )
 
       return actionSuccess(
         batteryModel,
@@ -100,23 +95,17 @@ export class BatteryModelService extends BaseService {
     try {
       const existing = await this.repository.findById(id)
 
-      if (!existing) {
+      if (!existing || !existing.is_active) {
         throw AppError.notFound("Modelo de bateria não encontrado.")
       }
 
       await this.repository.remove(id)
 
-      return actionSuccess(undefined, "Modelo de bateria excluído com sucesso.")
+      return actionSuccess(
+        undefined,
+        "Modelo de bateria desativado com sucesso."
+      )
     } catch (error) {
-      if (isForeignKeyViolation(error)) {
-        return this.handleError(
-          "BatteryModelService.remove",
-          AppError.badRequest(
-            "Não é possível excluir: o modelo está em uso na produção."
-          )
-        )
-      }
-
       return this.handleError("BatteryModelService.remove", error)
     }
   }

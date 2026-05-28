@@ -17,21 +17,12 @@ function isUniqueViolation(error: unknown): boolean {
   )
 }
 
-function isForeignKeyViolation(error: unknown): boolean {
-  return (
-    typeof error === "object" &&
-    error !== null &&
-    "code" in error &&
-    (error as { code: string }).code === "23503"
-  )
-}
-
 export class LeadAlloyService extends BaseService {
   private readonly repository = new LeadAlloyRepository()
 
   async list(): Promise<ActionResponse<LeadAlloy[]>> {
     try {
-      const leadAlloys = await this.repository.findAll()
+      const leadAlloys = await this.repository.findAll(true)
       return actionSuccess(leadAlloys)
     } catch (error) {
       return this.handleError("LeadAlloyService.list", error)
@@ -66,14 +57,18 @@ export class LeadAlloyService extends BaseService {
     try {
       const existing = await this.repository.findById(input.id)
 
-      if (!existing) {
+      if (!existing || !existing.is_active) {
         throw AppError.notFound("Liga não encontrada.")
       }
 
-      const leadAlloy = await this.repository.update(input.id, {
-        code: input.code,
-        description: input.description
-      })
+      const leadAlloy = await this.repository.update(
+        input.id,
+        {
+          code: input.code,
+          description: input.description
+        },
+        input.updated_at
+      )
 
       return actionSuccess(leadAlloy, "Liga atualizada com sucesso.")
     } catch (error) {
@@ -92,23 +87,14 @@ export class LeadAlloyService extends BaseService {
     try {
       const existing = await this.repository.findById(id)
 
-      if (!existing) {
+      if (!existing || !existing.is_active) {
         throw AppError.notFound("Liga não encontrada.")
       }
 
       await this.repository.remove(id)
 
-      return actionSuccess(undefined, "Liga excluída com sucesso.")
+      return actionSuccess(undefined, "Liga desativada com sucesso.")
     } catch (error) {
-      if (isForeignKeyViolation(error)) {
-        return this.handleError(
-          "LeadAlloyService.remove",
-          AppError.badRequest(
-            "Não é possível excluir: a liga está em uso na produção."
-          )
-        )
-      }
-
       return this.handleError("LeadAlloyService.remove", error)
     }
   }

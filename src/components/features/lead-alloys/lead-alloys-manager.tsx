@@ -9,6 +9,7 @@ import { deleteLeadAlloyAction } from "@/actions/lead-alloy-actions"
 import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Modal } from "@/components/ui/modal"
+import { toastFromActionResponse } from "@/lib/utils/toast-action"
 import type { LeadAlloy } from "@/types/lead-alloy"
 
 import { LeadAlloyModal } from "./lead-alloy-modal"
@@ -68,12 +69,12 @@ export function LeadAlloysManager({
     try {
       const result = await deleteLeadAlloyAction(deletingLeadAlloy.id)
 
-      if (!result.success) {
-        toast.error(result.message ?? "Erro ao excluir liga.")
-        return
-      }
+      const ok = toastFromActionResponse(result, {
+        successFallback: "Liga desativada com sucesso.",
+        errorFallback: "Erro ao excluir liga."
+      })
+      if (!ok) return
 
-      toast.success(result.message ?? "Liga excluída com sucesso.")
       closeDeleteConfirm()
       handleRefresh()
     } catch (error) {
@@ -131,7 +132,7 @@ export function LeadAlloysManager({
           <strong className="text-zinc-900 dark:text-zinc-100">
             {deletingLeadAlloy?.code}
           </strong>
-          ? Esta ação não pode ser desfeita.
+          ? O registro será desativado e não aparecerá mais na listagem.
         </p>
 
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">

@@ -507,6 +507,8 @@
 
 ## 7. Log de Execução (Roadmap)
 
+> **Retomada rápida:** veja `docs/EXECUTION_LOG.md` (checklists por fase + como validar/retomar).
+
 ### Fase 1: Setup e Autenticação
 
 - Configuração do projeto (Next.js, Tailwind, PWA).

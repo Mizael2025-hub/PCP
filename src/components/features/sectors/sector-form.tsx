@@ -11,6 +11,7 @@ import {
 } from "@/actions/sector-actions"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { toastFromActionResponse } from "@/lib/utils/toast-action"
 import type { Sector } from "@/types/sector"
 import {
   sectorFormSchema,
@@ -48,13 +49,11 @@ export function SectorForm({ sector, onSuccess, onCancel }: SectorFormProps) {
         ? await updateSectorAction({ id: sector!.id, name: data.name })
         : await createSectorAction(data)
 
-      if (!result.success) {
-        toast.error(result.message ?? "Erro ao salvar setor.")
-        return
+      if (
+        toastFromActionResponse(result, { successFallback: "Setor salvo." })
+      ) {
+        onSuccess()
       }
-
-      toast.success(result.message ?? "Setor salvo com sucesso.")
-      onSuccess()
     } catch (error) {
       console.error("[SectorForm.onSubmit]", error)
       toast.error("Erro interno.")

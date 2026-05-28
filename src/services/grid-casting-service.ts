@@ -133,17 +133,21 @@ export class GridCastingService extends BaseService {
 
       await this.assertReferences(input)
 
-      const record = await this.repository.update(input.id, {
-        date: input.date,
-        shift_id: input.shift_id,
-        machine_id: input.machine_id,
-        operator_id: input.operator_id,
-        alloy_id: input.alloy_id,
-        battery_model_id: input.battery_model_id,
-        gross_weight: input.gross_weight,
-        net_weight: input.net_weight,
-        produced_qty: input.produced_qty
-      })
+      const record = await this.repository.update(
+        input.id,
+        {
+          date: input.date,
+          shift_id: input.shift_id,
+          machine_id: input.machine_id,
+          operator_id: input.operator_id,
+          alloy_id: input.alloy_id,
+          battery_model_id: input.battery_model_id,
+          gross_weight: input.gross_weight,
+          net_weight: input.net_weight,
+          produced_qty: input.produced_qty
+        },
+        input.updated_at
+      )
 
       const [shifts, machines, employees, alloys, batteryModels] =
         await Promise.all([

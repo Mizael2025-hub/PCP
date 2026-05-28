@@ -1,4 +1,5 @@
 import { BaseRepository } from "@/repositories/base-repository"
+import { AppError } from "@/lib/errors/app-error"
 import type {
   FormationListFilters,
   FormationRecord,
@@ -91,19 +92,26 @@ export class FormationRecordRepository extends BaseRepository {
 
   async update(
     id: string,
-    input: FormationRecordUpdate
+    input: FormationRecordUpdate,
+    expectedUpdatedAt?: string
   ): Promise<FormationRecord> {
     const client = await this.getClient()
 
-    const { data, error } = await client
-      .from("formation_records")
-      .update(input)
-      .eq("id", id)
-      .select("*")
-      .single()
+    let query = client.from("formation_records").update(input).eq("id", id)
+    if (expectedUpdatedAt) {
+      query = query.eq("updated_at", expectedUpdatedAt)
+    }
+
+    const { data, error } = await query.select("*").maybeSingle()
 
     if (error) {
       throw error
+    }
+
+    if (!data) {
+      throw AppError.conflict(
+        "Registro foi alterado por outra pessoa. Recarregue e tente novamente."
+      )
     }
 
     return data

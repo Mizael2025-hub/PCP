@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select } from "@/components/ui/select"
+import { toastFromActionResponse } from "@/lib/utils/toast-action"
 import type { EmployeeWithSector } from "@/types/employee"
 import type { Sector } from "@/types/sector"
 import {
@@ -76,13 +77,14 @@ export function EmployeeForm({
           })
         : await createEmployeeAction(data)
 
-      if (!result.success) {
-        toast.error(result.message ?? "Erro ao salvar funcionário.")
-        return
+      if (
+        toastFromActionResponse(result, {
+          successFallback: "Funcionário salvo com sucesso.",
+          errorFallback: "Erro ao salvar funcionário."
+        })
+      ) {
+        onSuccess()
       }
-
-      toast.success(result.message ?? "Funcionário salvo com sucesso.")
-      onSuccess()
     } catch (error) {
       console.error("[EmployeeForm.onSubmit]", error)
       toast.error("Erro interno.")

@@ -8,12 +8,13 @@ const weightSchema = z.coerce
 const volumeSchema = z.coerce
   .number({ invalid_type_error: "Informe um volume válido." })
   .positive("O volume deve ser maior que zero.")
-  .max(99999999.99, "Volume fora do limite permitido.")
+  .max(10000, "Volume fora do limite permitido.")
 
 const densitySchema = z.coerce
   .number({ invalid_type_error: "Informe uma densidade válida." })
   .positive("A densidade deve ser maior que zero.")
-  .max(999.999, "Densidade fora do limite permitido.")
+  .min(0.5, "Densidade fora da faixa permitida.")
+  .max(2.5, "Densidade fora da faixa permitida.")
 
 const uuidSchema = (label: string) =>
   z
@@ -44,7 +45,10 @@ export const createMixerSchema = mixerBaseSchema
 
 export const updateMixerSchema = mixerBaseSchema.and(
   z.object({
-    id: z.string().uuid("ID inválido.")
+    id: z.string().uuid("ID inválido."),
+    updated_at: z
+      .string()
+      .min(1, "Registro desatualizado. Recarregue a página.")
   })
 )
 

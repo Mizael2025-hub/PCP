@@ -4,6 +4,7 @@ import { ThemeProvider } from "next-themes"
 import { Toaster } from "sonner"
 
 import { AuthProvider } from "@/components/providers/auth-provider"
+import { OfflineSyncProvider } from "@/components/providers/offline-sync-provider"
 
 type AppProvidersProps = {
   children: React.ReactNode
@@ -17,7 +18,9 @@ export function AppProviders({ children }: AppProvidersProps) {
       enableSystem
       disableTransitionOnChange
     >
-      <AuthProvider>{children}</AuthProvider>
+      <AuthProvider>
+        <OfflineSyncProvider>{children}</OfflineSyncProvider>
+      </AuthProvider>
       <Toaster
         position="top-center"
         richColors

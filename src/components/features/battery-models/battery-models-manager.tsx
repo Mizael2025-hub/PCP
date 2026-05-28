@@ -9,6 +9,7 @@ import { deleteBatteryModelAction } from "@/actions/battery-model-actions"
 import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Modal } from "@/components/ui/modal"
+import { toastFromActionResponse } from "@/lib/utils/toast-action"
 import type { BatteryModel } from "@/types/battery-model"
 
 import { BatteryModelModal } from "./battery-model-modal"
@@ -67,12 +68,12 @@ export function BatteryModelsManager({
     try {
       const result = await deleteBatteryModelAction(deletingBatteryModel.id)
 
-      if (!result.success) {
-        toast.error(result.message ?? "Erro ao excluir modelo de bateria.")
-        return
-      }
+      const ok = toastFromActionResponse(result, {
+        successFallback: "Modelo de bateria desativado com sucesso.",
+        errorFallback: "Erro ao excluir modelo de bateria."
+      })
+      if (!ok) return
 
-      toast.success(result.message ?? "Modelo de bateria excluído com sucesso.")
       closeDeleteConfirm()
       handleRefresh()
     } catch (error) {
@@ -130,7 +131,7 @@ export function BatteryModelsManager({
           <strong className="text-zinc-900 dark:text-zinc-100">
             {deletingBatteryModel?.name}
           </strong>
-          ? Esta ação não pode ser desfeita.
+          ? O registro será desativado e não aparecerá mais na listagem.
         </p>
 
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">

@@ -9,6 +9,7 @@ import { deleteEmployeeAction } from "@/actions/employee-actions"
 import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Modal } from "@/components/ui/modal"
+import { toastFromActionResponse } from "@/lib/utils/toast-action"
 import type { EmployeeWithSector } from "@/types/employee"
 import type { Sector } from "@/types/sector"
 
@@ -77,12 +78,12 @@ export function EmployeesManager({
     try {
       const result = await deleteEmployeeAction(deletingEmployee.id)
 
-      if (!result.success) {
-        toast.error(result.message ?? "Erro ao excluir funcionário.")
-        return
-      }
+      const ok = toastFromActionResponse(result, {
+        successFallback: "Funcionário desativado com sucesso.",
+        errorFallback: "Erro ao excluir funcionário."
+      })
+      if (!ok) return
 
-      toast.success(result.message ?? "Funcionário excluído com sucesso.")
       closeDeleteConfirm()
       handleRefresh()
     } catch (error) {

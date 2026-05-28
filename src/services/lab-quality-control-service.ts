@@ -130,14 +130,18 @@ export class LabQualityControlService extends BaseService {
 
       await this.assertSampleSource(input.source_id)
 
-      const record = await this.repository.update(input.id, {
-        date: input.date,
-        source_id: input.source_id,
-        acid_concentration: input.acid_concentration,
-        temperature: input.temperature,
-        status: input.status,
-        notes: input.notes
-      })
+      const record = await this.repository.update(
+        input.id,
+        {
+          date: input.date,
+          source_id: input.source_id,
+          acid_concentration: input.acid_concentration,
+          temperature: input.temperature,
+          status: input.status,
+          notes: input.notes
+        },
+        input.updated_at
+      )
 
       const [withRelations] = await this.attachSingleRecord(record)
 

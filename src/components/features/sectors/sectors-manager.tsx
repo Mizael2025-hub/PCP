@@ -9,6 +9,7 @@ import { deleteSectorAction } from "@/actions/sector-actions"
 import { Button } from "@/components/ui/button"
 import { EmptyState } from "@/components/ui/empty-state"
 import { Modal } from "@/components/ui/modal"
+import { toastFromActionResponse } from "@/lib/utils/toast-action"
 import type { Sector } from "@/types/sector"
 
 import { SectorModal } from "./sector-modal"
@@ -62,12 +63,12 @@ export function SectorsManager({ initialSectors }: SectorsManagerProps) {
     try {
       const result = await deleteSectorAction(deletingSector.id)
 
-      if (!result.success) {
-        toast.error(result.message ?? "Erro ao excluir setor.")
-        return
-      }
+      const ok = toastFromActionResponse(result, {
+        successFallback: "Setor desativado com sucesso.",
+        errorFallback: "Erro ao excluir setor."
+      })
+      if (!ok) return
 
-      toast.success(result.message ?? "Setor excluído com sucesso.")
       closeDeleteConfirm()
       handleRefresh()
     } catch (error) {

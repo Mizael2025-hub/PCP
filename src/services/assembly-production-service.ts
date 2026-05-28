@@ -216,14 +216,18 @@ export class AssemblyProductionService extends BaseService {
 
       await this.assertReferences(input, existing.id)
 
-      const record = await this.repository.update(input.id, {
-        date: input.date,
-        shift_id: input.shift_id,
-        machine_id: input.machine_id,
-        operator_id: input.operator_id,
-        produced_qty: input.produced_qty,
-        lot_characteristics: characteristicsToJson(input.characteristics)
-      })
+      const record = await this.repository.update(
+        input.id,
+        {
+          date: input.date,
+          shift_id: input.shift_id,
+          machine_id: input.machine_id,
+          operator_id: input.operator_id,
+          produced_qty: input.produced_qty,
+          lot_characteristics: characteristicsToJson(input.characteristics)
+        },
+        input.updated_at
+      )
 
       const [shifts, machines, employees, pastingRecords, batteryModels] =
         await Promise.all([
@@ -384,7 +388,10 @@ export class AssemblyProductionService extends BaseService {
           ep_code: record.ep_code,
           date: record.date,
           battery_model_id: record.battery_model_id,
-          plates_qty: record.plates_qty
+          plates_qty: record.plates_qty,
+          created_at: record.created_at,
+          updated_at: record.updated_at,
+          created_by: record.created_by
         }
       ])
     )

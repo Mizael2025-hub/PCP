@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form"
 import { toast } from "sonner"
 
 import { getSessionAction, loginAction } from "@/actions/auth-actions"
+import { toastFromActionResponse } from "@/lib/utils/toast-action"
 import { useAppStore } from "@/stores/app-store"
 import { loginSchema, type LoginSchema } from "@/validations/auth/login-schema"
 
@@ -38,10 +39,13 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
     try {
       const result = await loginAction(data)
 
-      if (!result.success) {
-        toast.error(result.message ?? "Erro ao entrar.")
-        return
-      }
+      const ok = toastFromActionResponse(result, {
+        successFallback: "Login realizado.",
+        errorFallback: "Erro ao entrar.",
+        showSuccess: false
+      })
+
+      if (!ok) return
 
       const sessionResult = await getSessionAction()
 

@@ -1,4 +1,5 @@
 import { BaseRepository } from "@/repositories/base-repository"
+import { AppError } from "@/lib/errors/app-error"
 import type {
   LabQualityControl,
   LabQualityControlInsert,
@@ -73,19 +74,26 @@ export class LabQualityControlRepository extends BaseRepository {
 
   async update(
     id: string,
-    input: LabQualityControlUpdate
+    input: LabQualityControlUpdate,
+    expectedUpdatedAt?: string
   ): Promise<LabQualityControl> {
     const client = await this.getClient()
 
-    const { data, error } = await client
-      .from("lab_quality_control")
-      .update(input)
-      .eq("id", id)
-      .select("*")
-      .single()
+    let query = client.from("lab_quality_control").update(input).eq("id", id)
+    if (expectedUpdatedAt) {
+      query = query.eq("updated_at", expectedUpdatedAt)
+    }
+
+    const { data, error } = await query.select("*").maybeSingle()
 
     if (error) {
       throw error
+    }
+
+    if (!data) {
+      throw AppError.conflict(
+        "Registro foi alterado por outra pessoa. Recarregue e tente novamente."
+      )
     }
 
     return data

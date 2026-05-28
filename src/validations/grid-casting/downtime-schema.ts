@@ -95,11 +95,15 @@ export const createGridCastingDowntimeSchema = downtimeFieldsSchema
 
 export const updateGridCastingDowntimeSchema = downtimeFieldsSchema
   .extend({
-    id: z.string().uuid("ID inválido.")
+    id: z.string().uuid("ID inválido."),
+    updated_at: z
+      .string()
+      .min(1, "Registro desatualizado. Recarregue a página.")
   })
   .superRefine(downtimeTimeRefinement)
   .transform((data) => ({
     id: data.id,
+    updated_at: data.updated_at,
     ...toPersistPayload(data)
   }))
 

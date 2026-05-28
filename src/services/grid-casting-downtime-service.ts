@@ -175,13 +175,17 @@ export class GridCastingDowntimeService extends BaseService {
 
       await this.assertProductionExists(input.production_id)
 
-      const record = await this.repository.update(input.id, {
-        production_id: input.production_id,
-        reason: input.reason,
-        duration_minutes: input.duration_minutes,
-        start_time: input.start_time,
-        end_time: input.end_time
-      })
+      const record = await this.repository.update(
+        input.id,
+        {
+          production_id: input.production_id,
+          reason: input.reason,
+          duration_minutes: input.duration_minutes,
+          start_time: input.start_time,
+          end_time: input.end_time
+        },
+        input.updated_at
+      )
 
       const withProduction = await this.attachSingleProduction(record)
 

@@ -96,12 +96,16 @@ export class LeadConsumptionService extends BaseService {
 
       await this.assertReferences(input)
 
-      const record = await this.repository.update(input.id, {
-        date: input.date,
-        alloy_id: input.alloy_id,
-        destination_sector_id: input.destination_sector_id,
-        weight_consumed: input.weight_consumed
-      })
+      const record = await this.repository.update(
+        input.id,
+        {
+          date: input.date,
+          alloy_id: input.alloy_id,
+          destination_sector_id: input.destination_sector_id,
+          weight_consumed: input.weight_consumed
+        },
+        input.updated_at
+      )
 
       const [alloys, sectors] = await Promise.all([
         this.alloyRepository.findAll(),

@@ -13,6 +13,8 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select } from "@/components/ui/select"
+import { enqueueOutbox } from "@/lib/offline/outbox"
+import { toastFromActionResponse } from "@/lib/utils/toast-action"
 import type { EmployeeWithSector } from "@/types/employee"
 import type { MixerProductionWithRelations } from "@/types/mixer-production"
 import type { Shift } from "@/types/shift"
@@ -105,17 +107,40 @@ export function MixerProductionForm({
         density: data.density
       }
 
-      const result = isEditing
-        ? await updateMixerAction({ id: record!.id, ...payload })
-        : await createMixerAction(payload)
+      if (!navigator.onLine) {
+        if (isEditing) {
+          await enqueueOutbox("mixer_update", {
+            id: record!.id,
+            updated_at: record!.updated_at,
+            ...payload
+          })
+        } else {
+          await enqueueOutbox("mixer_create", payload)
+        }
 
-      if (!result.success) {
-        toast.error(result.message ?? "Erro ao salvar apontamento.")
+        toast.success(
+          "Salvo no dispositivo. Enviaremos quando a internet voltar."
+        )
+        onSuccess()
         return
       }
 
-      toast.success(result.message ?? "Apontamento salvo com sucesso.")
-      onSuccess()
+      const result = isEditing
+        ? await updateMixerAction({
+            id: record!.id,
+            updated_at: record!.updated_at,
+            ...payload
+          })
+        : await createMixerAction(payload)
+
+      if (
+        toastFromActionResponse(result, {
+          successFallback: "Apontamento salvo com sucesso.",
+          errorFallback: "Erro ao salvar apontamento."
+        })
+      ) {
+        onSuccess()
+      }
     } catch (error) {
       console.error("[MixerProductionForm.onSubmit]", error)
       toast.error("Erro interno.")

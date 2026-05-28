@@ -1,4 +1,5 @@
 import { BaseRepository } from "@/repositories/base-repository"
+import { AppError } from "@/lib/errors/app-error"
 import type {
   GridCastingListFilters,
   GridCastingProduction,
@@ -75,19 +76,29 @@ export class GridCastingProductionRepository extends BaseRepository {
 
   async update(
     id: string,
-    input: GridCastingProductionUpdate
+    input: GridCastingProductionUpdate,
+    expectedUpdatedAt?: string
   ): Promise<GridCastingProduction> {
     const client = await this.getClient()
 
-    const { data, error } = await client
+    let query = client
       .from("grid_casting_production")
       .update(input)
       .eq("id", id)
-      .select("*")
-      .single()
+    if (expectedUpdatedAt) {
+      query = query.eq("updated_at", expectedUpdatedAt)
+    }
+
+    const { data, error } = await query.select("*").maybeSingle()
 
     if (error) {
       throw error
+    }
+
+    if (!data) {
+      throw AppError.conflict(
+        "Registro foi alterado por outra pessoa. Recarregue e tente novamente."
+      )
     }
 
     return data

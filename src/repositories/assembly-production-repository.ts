@@ -1,4 +1,5 @@
 import { BaseRepository } from "@/repositories/base-repository"
+import { AppError } from "@/lib/errors/app-error"
 import type {
   AssemblyListFilters,
   AssemblyProduction,
@@ -168,19 +169,26 @@ export class AssemblyProductionRepository extends BaseRepository {
 
   async update(
     id: string,
-    input: AssemblyProductionUpdate
+    input: AssemblyProductionUpdate,
+    expectedUpdatedAt?: string
   ): Promise<AssemblyProduction> {
     const client = await this.getClient()
 
-    const { data, error } = await client
-      .from("assembly_production")
-      .update(input)
-      .eq("id", id)
-      .select("*")
-      .single()
+    let query = client.from("assembly_production").update(input).eq("id", id)
+    if (expectedUpdatedAt) {
+      query = query.eq("updated_at", expectedUpdatedAt)
+    }
+
+    const { data, error } = await query.select("*").maybeSingle()
 
     if (error) {
       throw error
+    }
+
+    if (!data) {
+      throw AppError.conflict(
+        "Registro foi alterado por outra pessoa. Recarregue e tente novamente."
+      )
     }
 
     return data

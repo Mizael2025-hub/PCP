@@ -114,21 +114,27 @@ export interface Database {
           name: string
           start_time: string
           end_time: string
+          is_active: boolean
           created_at: string
+          updated_at: string
         }
         Insert: {
           id?: string
           name: string
           start_time: string
           end_time: string
+          is_active?: boolean
           created_at?: string
+          updated_at?: string
         }
         Update: {
           id?: string
           name?: string
           start_time?: string
           end_time?: string
+          is_active?: boolean
           created_at?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -189,21 +195,27 @@ export interface Database {
           code: string
           name: string
           weight_specification: number
+          is_active: boolean
           created_at: string
+          updated_at: string
         }
         Insert: {
           id?: string
           code: string
           name: string
           weight_specification: number
+          is_active?: boolean
           created_at?: string
+          updated_at?: string
         }
         Update: {
           id?: string
           code?: string
           name?: string
           weight_specification?: number
+          is_active?: boolean
           created_at?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -212,19 +224,25 @@ export interface Database {
           id: string
           code: string
           description: string | null
+          is_active: boolean
           created_at: string
+          updated_at: string
         }
         Insert: {
           id?: string
           code: string
           description?: string | null
+          is_active?: boolean
           created_at?: string
+          updated_at?: string
         }
         Update: {
           id?: string
           code?: string
           description?: string | null
+          is_active?: boolean
           created_at?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -241,6 +259,7 @@ export interface Database {
           net_weight: number
           produced_qty: number
           created_at: string
+          updated_at: string
           created_by: string | null
         }
         Insert: {
@@ -255,6 +274,7 @@ export interface Database {
           net_weight: number
           produced_qty: number
           created_at?: string
+          updated_at?: string
           created_by?: string | null
         }
         Update: {
@@ -269,6 +289,7 @@ export interface Database {
           net_weight?: number
           produced_qty?: number
           created_at?: string
+          updated_at?: string
           created_by?: string | null
         }
         Relationships: []
@@ -281,6 +302,8 @@ export interface Database {
           duration_minutes: number
           start_time: string
           end_time: string
+          updated_at: string
+          created_by: string | null
         }
         Insert: {
           id?: string
@@ -289,6 +312,8 @@ export interface Database {
           duration_minutes: number
           start_time: string
           end_time: string
+          updated_at?: string
+          created_by?: string | null
         }
         Update: {
           id?: string
@@ -297,6 +322,8 @@ export interface Database {
           duration_minutes?: number
           start_time?: string
           end_time?: string
+          updated_at?: string
+          created_by?: string | null
         }
         Relationships: []
       }
@@ -309,6 +336,8 @@ export interface Database {
           weight_produced: number
           silo_number: number
           created_at: string
+          updated_at: string
+          created_by: string | null
         }
         Insert: {
           id?: string
@@ -318,6 +347,8 @@ export interface Database {
           weight_produced: number
           silo_number: number
           created_at?: string
+          updated_at?: string
+          created_by?: string | null
         }
         Update: {
           id?: string
@@ -327,6 +358,8 @@ export interface Database {
           weight_produced?: number
           silo_number?: number
           created_at?: string
+          updated_at?: string
+          created_by?: string | null
         }
         Relationships: []
       }
@@ -339,6 +372,8 @@ export interface Database {
           oxide_weight: number
           oxidation_degree: number
           created_at: string
+          updated_at: string
+          created_by: string | null
         }
         Insert: {
           id?: string
@@ -348,6 +383,8 @@ export interface Database {
           oxide_weight: number
           oxidation_degree: number
           created_at?: string
+          updated_at?: string
+          created_by?: string | null
         }
         Update: {
           id?: string
@@ -357,6 +394,8 @@ export interface Database {
           oxide_weight?: number
           oxidation_degree?: number
           created_at?: string
+          updated_at?: string
+          created_by?: string | null
         }
         Relationships: []
       }
@@ -373,6 +412,8 @@ export interface Database {
           acid_volume: number
           density: number
           created_at: string
+          updated_at: string
+          created_by: string | null
         }
         Insert: {
           id?: string
@@ -386,6 +427,8 @@ export interface Database {
           acid_volume: number
           density: number
           created_at?: string
+          updated_at?: string
+          created_by?: string | null
         }
         Update: {
           id?: string
@@ -399,6 +442,8 @@ export interface Database {
           acid_volume?: number
           density?: number
           created_at?: string
+          updated_at?: string
+          created_by?: string | null
         }
         Relationships: []
       }
@@ -410,6 +455,8 @@ export interface Database {
           weight_consumed: number
           destination_sector_id: string
           created_at: string
+          updated_at: string
+          created_by: string | null
         }
         Insert: {
           id?: string
@@ -418,6 +465,8 @@ export interface Database {
           weight_consumed: number
           destination_sector_id: string
           created_at?: string
+          updated_at?: string
+          created_by?: string | null
         }
         Update: {
           id?: string
@@ -426,6 +475,8 @@ export interface Database {
           weight_consumed?: number
           destination_sector_id?: string
           created_at?: string
+          updated_at?: string
+          created_by?: string | null
         }
         Relationships: []
       }
@@ -440,6 +491,8 @@ export interface Database {
           battery_model_id: string
           plates_qty: number
           created_at: string
+          updated_at: string
+          created_by: string | null
         }
         Insert: {
           id?: string
@@ -451,6 +504,8 @@ export interface Database {
           battery_model_id: string
           plates_qty: number
           created_at?: string
+          updated_at?: string
+          created_by?: string | null
         }
         Update: {
           id?: string
@@ -462,6 +517,8 @@ export interface Database {
           battery_model_id?: string
           plates_qty?: number
           created_at?: string
+          updated_at?: string
+          created_by?: string | null
         }
         Relationships: []
       }
@@ -473,6 +530,8 @@ export interface Database {
           scrap_weight: number
           plates_qty_lost: number
           created_at: string
+          updated_at: string
+          created_by: string | null
         }
         Insert: {
           id?: string
@@ -481,6 +540,8 @@ export interface Database {
           scrap_weight: number
           plates_qty_lost: number
           created_at?: string
+          updated_at?: string
+          created_by?: string | null
         }
         Update: {
           id?: string
@@ -489,6 +550,8 @@ export interface Database {
           scrap_weight?: number
           plates_qty_lost?: number
           created_at?: string
+          updated_at?: string
+          created_by?: string | null
         }
         Relationships: []
       }
@@ -504,6 +567,8 @@ export interface Database {
           produced_qty: number
           lot_characteristics: Json
           created_at: string
+          updated_at: string
+          created_by: string | null
         }
         Insert: {
           id?: string
@@ -516,6 +581,8 @@ export interface Database {
           produced_qty: number
           lot_characteristics?: Json
           created_at?: string
+          updated_at?: string
+          created_by?: string | null
         }
         Update: {
           id?: string
@@ -528,6 +595,8 @@ export interface Database {
           produced_qty?: number
           lot_characteristics?: Json
           created_at?: string
+          updated_at?: string
+          created_by?: string | null
         }
         Relationships: []
       }
@@ -544,6 +613,8 @@ export interface Database {
           status: string
           notes: string | null
           created_at: string
+          updated_at: string
+          created_by: string | null
         }
         Insert: {
           id?: string
@@ -557,6 +628,8 @@ export interface Database {
           status?: string
           notes?: string | null
           created_at?: string
+          updated_at?: string
+          created_by?: string | null
         }
         Update: {
           id?: string
@@ -570,6 +643,8 @@ export interface Database {
           status?: string
           notes?: string | null
           created_at?: string
+          updated_at?: string
+          created_by?: string | null
         }
         Relationships: []
       }
@@ -582,6 +657,8 @@ export interface Database {
           operator_id: string
           status: string
           created_at: string
+          updated_at: string
+          created_by: string | null
         }
         Insert: {
           id?: string
@@ -591,6 +668,8 @@ export interface Database {
           operator_id: string
           status?: string
           created_at?: string
+          updated_at?: string
+          created_by?: string | null
         }
         Update: {
           id?: string
@@ -600,6 +679,8 @@ export interface Database {
           operator_id?: string
           status?: string
           created_at?: string
+          updated_at?: string
+          created_by?: string | null
         }
         Relationships: []
       }
@@ -613,6 +694,7 @@ export interface Database {
           final_voltage: number | null
           current_ampere: number
           created_at: string
+          updated_at: string
         }
         Insert: {
           id?: string
@@ -623,6 +705,7 @@ export interface Database {
           final_voltage?: number | null
           current_ampere: number
           created_at?: string
+          updated_at?: string
         }
         Update: {
           id?: string
@@ -633,6 +716,40 @@ export interface Database {
           final_voltage?: number | null
           current_ampere?: number
           created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      audit_log: {
+        Row: {
+          id: string
+          table_name: string
+          record_id: string | null
+          action: string
+          changed_by: string | null
+          changed_at: string
+          before: Json | null
+          after: Json | null
+        }
+        Insert: {
+          id?: string
+          table_name: string
+          record_id?: string | null
+          action: string
+          changed_by?: string | null
+          changed_at?: string
+          before?: Json | null
+          after?: Json | null
+        }
+        Update: {
+          id?: string
+          table_name?: string
+          record_id?: string | null
+          action?: string
+          changed_by?: string | null
+          changed_at?: string
+          before?: Json | null
+          after?: Json | null
         }
         Relationships: []
       }
